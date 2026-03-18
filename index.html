@@ -980,7 +980,7 @@
             return calidadAbrMap[calidad] || calidad.substring(0, 1).toUpperCase();
         }
 
-        // --- FUNCIÓN DE CÓDIGO SIMPLIFICADA (para registros) ---
+        // --- FUNCIÓN DE CÓDIGO SIMPLIFICADA ---
         function generarCodigoRamo() {
             const ahora = new Date();
             const año = ahora.getFullYear().toString().slice(-2);
@@ -991,17 +991,6 @@
             const secuenciaStr = secuencia.toString().padStart(8, '0'); // 8 dígitos
             codigoCounter++; // incrementamos para el próximo
             return fecha + secuenciaStr; // 14 dígitos total
-        }
-
-        // --- FUNCIÓN PARA GENERAR CÓDIGO TEMPORAL (SOLO PARA IMPRESIÓN) ---
-        function generarCodigoTemporal() {
-            const ahora = new Date();
-            const año = ahora.getFullYear().toString().slice(-2);
-            const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
-            const dia = ahora.getDate().toString().padStart(2, '0');
-            const fecha = `${año}${mes}${dia}`; // 6 dígitos
-            const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0'); // 8 dígitos aleatorios
-            return fecha + random; // 14 dígitos
         }
 
         // --- FUNCIONES DE COMUNICACIÓN CON LA API ---
@@ -1159,74 +1148,106 @@
             };
         }
 
-        // --- FUNCIÓN GENERAR PDF ---
-        function generarPDF(registros, tipo) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: [25, 58]
-            });
+     // --- FUNCIÓN GENERAR PDF ---
+function generarPDF(registros, tipo) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: [25, 58]
+    });
 
-            registros.forEach((registro, index) => {
-                if (index > 0) doc.addPage([25, 58]);
+    registros.forEach((registro, index) => {
+        if (index > 0) doc.addPage([25, 58]);
 
-                doc.setFontSize(5);
-                doc.setFont('helvetica', 'bold');
-                doc.text(tipo, 50, 3);
+        doc.setFontSize(5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(tipo, 50, 3);
 
-                doc.setFontSize(4);
-                doc.setFont('helvetica', 'normal');
-                doc.text('PRODUCT GROWN IN ECUADOR', 16, 3);
-                doc.text('ZC ROSES', 2, 22);
-                doc.text('THE BEST FLOWER ROR YOU', 2, 24);
+        doc.setFontSize(4);
+        doc.setFont('helvetica', 'normal');
+        doc.text('PRODUCT GROWN IN ECUADOR', 16, 3);
+        doc.text('ZC ROSES', 2, 22);
+        doc.text('THE BEST FLOWER ROR YOU', 2, 24);
 
-                doc.setFont('helvetica', 'bold');
-                let variedad = registro.variedad;
-                let fontSizeVariedad = 14;
-                const maxAnchoVariedad = 40;
-                doc.setFontSize(fontSizeVariedad);
-                let anchoVariedad = doc.getTextWidth(variedad);
-                while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
-                    fontSizeVariedad -= 1;
-                    doc.setFontSize(fontSizeVariedad);
-                    anchoVariedad = doc.getTextWidth(variedad);
-                }
-                doc.text(variedad, 29, 9, { align: 'center' });
-
-                doc.setFontSize(14);
-                const tallosTexto = `${registro.longitud}/${registro.tallos}`;
-                doc.text(tallosTexto, 3, 16);
-
-                const proveedor = registro.proveedor || 'ZC ROSES';
-                const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
-                const calidadAbr = registro.calidadAbr || 'E';
-                doc.setFontSize(6);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`${iniciales} |  ${calidadAbr}`, 16, 22);
-
-                const canvas = document.createElement('canvas');
-                JsBarcode(canvas, registro.codigo, {
-                    format: "CODE128",
-                    width: 2,
-                    height: 2,
-                    displayValue: false,
-                    margin: 0
-                });
-                const imgData = canvas.toDataURL('image/png');
-                const imgAncho = 35;
-                const imgX = (68 - imgAncho) / 2;
-                doc.addImage(imgData, 'PNG', imgX, 12, imgAncho, 8);
-
-                doc.setFontSize(5);
-                const codigoTexto = registro.codigo;
-                const anchoCodigo = doc.getTextWidth(codigoTexto);
-                const codigoX = (80 - anchoCodigo) / 2;
-                doc.text(codigoTexto, codigoX, 22);
-            });
-
-            window.open(doc.output('bloburl'), '_blank');
+        doc.setFont('helvetica', 'bold');
+        let variedad = registro.variedad;
+        let fontSizeVariedad = 14;
+        const maxAnchoVariedad = 40;
+        doc.setFontSize(fontSizeVariedad);
+        let anchoVariedad = doc.getTextWidth(variedad);
+        while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
+            fontSizeVariedad -= 1;
+            doc.setFontSize(fontSizeVariedad);
+            anchoVariedad = doc.getTextWidth(variedad);
         }
+        doc.text(variedad, 29, 9, { align: 'center' });
+
+        doc.setFontSize(14);
+        const tallosTexto = `${registro.longitud}/${registro.tallos}`;
+        doc.text(tallosTexto, 3, 16);
+
+        const proveedor = registro.proveedor || 'ZC ROSES';
+        const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
+        const calidadAbr = registro.calidadAbr || 'E';
+        doc.setFontSize(6);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${iniciales} |  ${calidadAbr}`, 16, 22);
+
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, registro.codigo, {
+            format: "CODE128",
+            width: 2,
+            height: 2,
+            displayValue: false,
+            margin: 0
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const imgAncho = 35;
+        const imgX = (68 - imgAncho) / 2;
+        doc.addImage(imgData, 'PNG', imgX, 12, imgAncho, 8);
+
+        doc.setFontSize(5);
+        const codigoTexto = registro.codigo;
+        const anchoCodigo = doc.getTextWidth(codigoTexto);
+        const codigoX = (80 - anchoCodigo) / 2;
+        doc.text(codigoTexto, codigoX, 22);
+    });
+
+    // ===== NUEVA PARTE: Cargar PDF en iframe oculto y abrir diálogo de impresión =====
+    const pdfBlob = doc.output('blob'); // Convertir el PDF a un objeto Blob
+    const pdfUrl = URL.createObjectURL(pdfBlob); // Crear una URL temporal
+
+    // Crear un iframe invisible (fuera de la pantalla)
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    // Cuando el iframe cargue el PDF, ejecutamos print()
+    iframe.onload = function() {
+        try {
+            // Enfocar el iframe (necesario en algunos navegadores)
+            this.contentWindow.focus();
+            // Abrir el diálogo de impresión del navegador
+            this.contentWindow.print();
+        } catch (error) {
+            console.error('Error al imprimir:', error);
+        } finally {
+            // Limpiar el iframe y la URL después de un tiempo (para que la impresión se inicie)
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+                URL.revokeObjectURL(pdfUrl);
+            }, 2000);
+        }
+    };
+
+    iframe.src = pdfUrl; // Inicia la carga del PDF en el iframe
+}
 
         // Función auxiliar para limpiar la fecha (quitar la parte de hora si existe)
         function limpiarFecha(fechaStr) {
@@ -1266,7 +1287,7 @@
             totalTallosMatriz.innerText = inventario.reduce((acc, i) => acc + i.tallos, 0);
         }
 
-        function renderizarMatriz() {
+                function renderizarMatriz() {
             const desde = fechaDesdeMatriz.value;
             const hasta = fechaHastaMatriz.value;
             const calidadFiltro = filterCalidadMatriz.value;
@@ -1352,30 +1373,9 @@
 
         function imprimirEtiquetas() {
             let cant = parseInt(currentValue, 10);
-            if (!cant) {
-                alert('La cantidad no puede ser 0');
-                return;
-            }
-            const datosBase = obtenerDatosFormulario();
-            const calidadAbr = getAbreviaturaCalidad(datosBase.calidad);
-            const registrosParaImprimir = [];
-
-            for (let i = 0; i < cant; i++) {
-                const codigo = generarCodigoTemporal();
-                registrosParaImprimir.push({
-                    codigo: codigo,
-                    fecha: datosBase.fecha,
-                    proveedor: datosBase.proveedor,
-                    calidad: datosBase.calidad,
-                    calidadAbr: calidadAbr,
-                    variedad: datosBase.variedad,
-                    empaque: datosBase.empaque,
-                    ptoCorte: datosBase.ptoCorte,
-                    longitud: parseInt(datosBase.longitud),
-                    tallos: parseInt(datosBase.tallos)
-                });
-            }
-            generarPDF(registrosParaImprimir, 'IMP');
+            if (!cant) { alert('La cantidad no puede ser 0'); return; }
+            agregarRegistros(cant, true, 'IMP');
+            resetearContador();
         }
 
         btnRegistrar.addEventListener('click', e => { e.preventDefault(); registrarEtiquetas(); });
