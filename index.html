@@ -1205,13 +1205,13 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
                 });
                 const imgData = canvas.toDataURL('image/png');
                 const imgAncho = 35;
-                const imgX = (58 - imgAncho) / 2;
+                const imgX = (68 - imgAncho) / 2;
                 doc.addImage(imgData, 'PNG', imgX, 12, imgAncho, 8);
 
                 doc.setFontSize(5);
                 const codigoTexto = registro.codigo;
                 const anchoCodigo = doc.getTextWidth(codigoTexto);
-                const codigoX = (58 - anchoCodigo) / 2;
+                const codigoX = (80 - anchoCodigo) / 2;
                 doc.text(codigoTexto, codigoX, 22);
             });
 
