@@ -948,7 +948,7 @@
 
         // Establecer fechas por defecto en los filtros de matriz (últimos 7 días)
         const hace7Dias = new Date(hoy);
-        hace7Dias.setDate(hoy.getDate() - 7);
+        hace7Dias.setDate(hoy.getDate() - 10);
         const añoDesde = hace7Dias.getFullYear();
         const mesDesde = (hace7Dias.getMonth() + 1).toString().padStart(2, '0');
         const diaDesde = hace7Dias.getDate().toString().padStart(2, '0');
@@ -1255,22 +1255,25 @@
             totalTallosMatriz.innerText = inventario.reduce((acc, i) => acc + i.tallos, 0);
         }
 
-        function renderizarMatriz() {
+                function renderizarMatriz() {
             const desde = fechaDesdeMatriz.value;
             const hasta = fechaHastaMatriz.value;
             const calidadFiltro = filterCalidadMatriz.value;
             const busqueda = searchInputMatriz.value.toLowerCase();
 
+            // Filtrar usando solo la parte de la fecha (sin hora)
             const filtrados = inventario.filter(i => {
-                if (desde && i.fecha < desde) return false;
-                if (hasta && i.fecha > hasta) return false;
+                const fechaItem = limpiarFecha(i.fecha); // ← importante: quita la hora
+                if (desde && fechaItem < desde) return false;
+                if (hasta && fechaItem > hasta) return false;
                 if (calidadFiltro && i.calidadAbr !== calidadFiltro) return false;
                 return true;
             });
 
-            // Limpiar las fechas antes de obtener las únicas
+            // Obtener fechas únicas (ya limpias)
             const fechas = [...new Set(filtrados.map(i => limpiarFecha(i.fecha)))].sort();
 
+            // Agrupar por clave (variedad, longitud, tallos, empaque, calidad, corte)
             const grupos = {};
             filtrados.forEach(i => {
                 const fechaLimpia = limpiarFecha(i.fecha);
@@ -1280,14 +1283,16 @@
                 grupos[key].fechas[fechaLimpia]++;
             });
 
+            // Filtrar por búsqueda de variedad
             const gruposArray = Object.values(grupos).filter(g => g.variedad.toLowerCase().includes(busqueda));
             gruposArray.sort((a, b) => a.variedad.localeCompare(b.variedad) || parseInt(a.longitud) - parseInt(b.longitud));
 
+            // Construir encabezados de la tabla
             let thead = '<tr><th>Variedades</th><th>Emp</th><th>Cal</th><th>Pto</th>';
             fechas.forEach(f => {
                 const partes = f.split('-');
                 if (partes.length === 3) {
-                    thead += `<th>${partes[1]}/${partes[2]}</th>`; // MM/DD
+                    thead += `<th>${partes[1]}/${partes[2]}</th>`; // formato MM/DD
                 } else {
                     thead += `<th>${f}</th>`;
                 }
@@ -1300,6 +1305,7 @@
                 return;
             }
 
+            // Generar filas de la tabla
             let tbody = '', totales = {}, totalGlobal = 0;
             fechas.forEach(f => totales[f] = 0);
             gruposArray.forEach(g => {
@@ -1316,6 +1322,7 @@
                 totalGlobal += suma;
             });
 
+            // Fila de totales
             let totalRow = '<tr class="total-row"><td colspan="4">Totales:</td>';
             fechas.forEach(f => totalRow += `<td><strong>${totales[f]}</strong></td>`);
             totalRow += `<td><strong>${totalGlobal}</strong></td></tr>`;
