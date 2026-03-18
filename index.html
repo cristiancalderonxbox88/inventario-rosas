@@ -1226,7 +1226,7 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
             let html = '';
             historial.forEach(item => {
                 html += `<tr>
-                    <td>${item.fecha}</td>
+                    <td>${item.fecha.split('-')[1]}/${item.fecha.split('-')[2]}/${item.fecha.split('-')[0]}</td>
                     <td>${item.variedad}</td>
                     <td>${item.longitud}</td>
                     <td>${item.tallos}</td>
@@ -1272,7 +1272,7 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
             gruposArray.sort((a, b) => a.variedad.localeCompare(b.variedad) || parseInt(a.longitud) - parseInt(b.longitud));
 
             let thead = '<tr><th>Variedades</th><th>Emp</th><th>Cal</th><th>Pto</th>';
-            fechas.forEach(f => thead += `<th>${f.split('-')[2]}-${f.split('-')[1]}</th>`);
+            fechas.forEach(f => thead += `<th>${f.split('-')[1]}/${f.split('-')[2]}</th>`);
             thead += '<th>Total</th></tr>';
             matrizThead.innerHTML = thead;
 
