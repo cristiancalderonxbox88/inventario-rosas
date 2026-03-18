@@ -980,7 +980,7 @@
             return calidadAbrMap[calidad] || calidad.substring(0, 1).toUpperCase();
         }
 
-        // --- FUNCIÓN DE CÓDIGO SIMPLIFICADA ---
+        // --- FUNCIÓN DE CÓDIGO SIMPLIFICADA (para registros) ---
         function generarCodigoRamo() {
             const ahora = new Date();
             const año = ahora.getFullYear().toString().slice(-2);
@@ -991,6 +991,17 @@
             const secuenciaStr = secuencia.toString().padStart(8, '0'); // 8 dígitos
             codigoCounter++; // incrementamos para el próximo
             return fecha + secuenciaStr; // 14 dígitos total
+        }
+
+        // --- FUNCIÓN PARA GENERAR CÓDIGO TEMPORAL (SOLO PARA IMPRESIÓN) ---
+        function generarCodigoTemporal() {
+            const ahora = new Date();
+            const año = ahora.getFullYear().toString().slice(-2);
+            const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
+            const dia = ahora.getDate().toString().padStart(2, '0');
+            const fecha = `${año}${mes}${dia}`; // 6 dígitos
+            const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0'); // 8 dígitos aleatorios
+            return fecha + random; // 14 dígitos
         }
 
         // --- FUNCIONES DE COMUNICACIÓN CON LA API ---
@@ -1255,7 +1266,7 @@
             totalTallosMatriz.innerText = inventario.reduce((acc, i) => acc + i.tallos, 0);
         }
 
-                function renderizarMatriz() {
+        function renderizarMatriz() {
             const desde = fechaDesdeMatriz.value;
             const hasta = fechaHastaMatriz.value;
             const calidadFiltro = filterCalidadMatriz.value;
@@ -1341,9 +1352,30 @@
 
         function imprimirEtiquetas() {
             let cant = parseInt(currentValue, 10);
-            if (!cant) { alert('La cantidad no puede ser 0'); return; }
-            agregarRegistros(cant, true, 'IMP');
-            resetearContador();
+            if (!cant) {
+                alert('La cantidad no puede ser 0');
+                return;
+            }
+            const datosBase = obtenerDatosFormulario();
+            const calidadAbr = getAbreviaturaCalidad(datosBase.calidad);
+            const registrosParaImprimir = [];
+
+            for (let i = 0; i < cant; i++) {
+                const codigo = generarCodigoTemporal();
+                registrosParaImprimir.push({
+                    codigo: codigo,
+                    fecha: datosBase.fecha,
+                    proveedor: datosBase.proveedor,
+                    calidad: datosBase.calidad,
+                    calidadAbr: calidadAbr,
+                    variedad: datosBase.variedad,
+                    empaque: datosBase.empaque,
+                    ptoCorte: datosBase.ptoCorte,
+                    longitud: parseInt(datosBase.longitud),
+                    tallos: parseInt(datosBase.tallos)
+                });
+            }
+            generarPDF(registrosParaImprimir, 'IMP');
         }
 
         btnRegistrar.addEventListener('click', e => { e.preventDefault(); registrarEtiquetas(); });
