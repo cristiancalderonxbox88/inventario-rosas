@@ -934,27 +934,26 @@
         const tabHistorial = document.getElementById('tabHistorial');
         const tabMatriz = document.getElementById('tabMatriz');
 
-  // Elementos de matriz
-const fechaDesdeMatriz = document.getElementById('fechaDesdeMatriz');
-const fechaHastaMatriz = document.getElementById('fechaHastaMatriz');
-const filterCalidadMatriz = document.getElementById('filterCalidadMatriz');
-const searchInputMatriz = document.getElementById('searchInputMatriz');
-const matrizThead = document.getElementById('matrizThead');
-const matrizTbody = document.getElementById('matrizTbody');
-const totalRegistrosMatriz = document.getElementById('totalRegistrosMatriz');
-const totalVariedadesMatriz = document.getElementById('totalVariedadesMatriz');
-const totalTallosMatriz = document.getElementById('totalTallosMatriz');
-const btnClearInventoryMatriz = document.getElementById('btnClearInventoryMatriz');
+        // Elementos de matriz
+        const fechaDesdeMatriz = document.getElementById('fechaDesdeMatriz');
+        const fechaHastaMatriz = document.getElementById('fechaHastaMatriz');
+        const filterCalidadMatriz = document.getElementById('filterCalidadMatriz');
+        const searchInputMatriz = document.getElementById('searchInputMatriz');
+        const matrizThead = document.getElementById('matrizThead');
+        const matrizTbody = document.getElementById('matrizTbody');
+        const totalRegistrosMatriz = document.getElementById('totalRegistrosMatriz');
+        const totalVariedadesMatriz = document.getElementById('totalVariedadesMatriz');
+        const totalTallosMatriz = document.getElementById('totalTallosMatriz');
+        const btnClearInventoryMatriz = document.getElementById('btnClearInventoryMatriz');
 
-// Establecer fechas por defecto en los filtros de matriz (últimos 7 días)
-const hace7Dias = new Date(hoy);
-hace7Dias.setDate(hoy.getDate() - 7);
-const añoDesde = hace7Dias.getFullYear();
-const mesDesde = (hace7Dias.getMonth() + 1).toString().padStart(2, '0');
-const diaDesde = hace7Dias.getDate().toString().padStart(2, '0');
-fechaDesdeMatriz.value = `${añoDesde}-${mesDesde}-${diaDesde}`;
-fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
-
+        // Establecer fechas por defecto en los filtros de matriz (últimos 7 días)
+        const hace7Dias = new Date(hoy);
+        hace7Dias.setDate(hoy.getDate() - 7);
+        const añoDesde = hace7Dias.getFullYear();
+        const mesDesde = (hace7Dias.getMonth() + 1).toString().padStart(2, '0');
+        const diaDesde = hace7Dias.getDate().toString().padStart(2, '0');
+        fechaDesdeMatriz.value = `${añoDesde}-${mesDesde}-${diaDesde}`;
+        fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
 
         // Elementos de historial
         const historialBody = document.getElementById('historialBody');
@@ -1218,6 +1217,13 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
             window.open(doc.output('bloburl'), '_blank');
         }
 
+        // Función auxiliar para limpiar la fecha (quitar la parte de hora si existe)
+        function limpiarFecha(fechaStr) {
+            if (!fechaStr) return '';
+            // Si viene con formato ISO (YYYY-MM-DDTHH:MM:SS), tomamos solo la parte antes de la T
+            return fechaStr.split('T')[0];
+        }
+
         function actualizarHistorial() {
             if (historial.length === 0) {
                 historialBody.innerHTML = '<tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>';
@@ -1225,8 +1231,11 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
             }
             let html = '';
             historial.forEach(item => {
+                const fechaLimpia = limpiarFecha(item.fecha);
+                const partes = fechaLimpia.split('-');
+                const fechaFormateada = partes.length === 3 ? `${partes[1]}/${partes[2]}/${partes[0]}` : fechaLimpia;
                 html += `<tr>
-                    <td>${item.fecha.split('-')[1]}/${item.fecha.split('-')[2]}/${item.fecha.split('-')[0]}</td>
+                    <td>${fechaFormateada}</td>
                     <td>${item.variedad}</td>
                     <td>${item.longitud}</td>
                     <td>${item.tallos}</td>
@@ -1259,20 +1268,30 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
                 return true;
             });
 
-            const fechas = [...new Set(filtrados.map(i => i.fecha))].sort();
+            // Limpiar las fechas antes de obtener las únicas
+            const fechas = [...new Set(filtrados.map(i => limpiarFecha(i.fecha)))].sort();
+
             const grupos = {};
             filtrados.forEach(i => {
+                const fechaLimpia = limpiarFecha(i.fecha);
                 const key = `${i.variedad}|${i.longitud}|${i.tallos}|${i.empaque}|${i.calidadAbr}|${i.ptoCorte}`;
                 if (!grupos[key]) grupos[key] = { ...i, fechas: {} };
-                if (!grupos[key].fechas[i.fecha]) grupos[key].fechas[i.fecha] = 0;
-                grupos[key].fechas[i.fecha]++;
+                if (!grupos[key].fechas[fechaLimpia]) grupos[key].fechas[fechaLimpia] = 0;
+                grupos[key].fechas[fechaLimpia]++;
             });
 
             const gruposArray = Object.values(grupos).filter(g => g.variedad.toLowerCase().includes(busqueda));
             gruposArray.sort((a, b) => a.variedad.localeCompare(b.variedad) || parseInt(a.longitud) - parseInt(b.longitud));
 
             let thead = '<tr><th>Variedades</th><th>Emp</th><th>Cal</th><th>Pto</th>';
-            fechas.forEach(f => thead += `<th>${f.split('-')[1]}/${f.split('-')[2]}</th>`);
+            fechas.forEach(f => {
+                const partes = f.split('-');
+                if (partes.length === 3) {
+                    thead += `<th>${partes[1]}/${partes[2]}</th>`; // MM/DD
+                } else {
+                    thead += `<th>${f}</th>`;
+                }
+            });
             thead += '<th>Total</th></tr>';
             matrizThead.innerHTML = thead;
 
@@ -1287,7 +1306,7 @@ fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
                 let row = `<tr><td>${g.variedad} ${g.longitud} ${g.tallos} ${g.calidadAbr}</td><td>${g.empaque}</td><td>${g.calidadAbr}</td><td>${g.ptoCorte}</td>`;
                 let suma = 0;
                 fechas.forEach(f => {
-                    let cnt = g.fechas[f] || 0;
+                    const cnt = g.fechas[f] || 0;
                     row += `<td>${cnt || ''}</td>`;
                     suma += cnt;
                     totales[f] += cnt;
