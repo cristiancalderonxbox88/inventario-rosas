@@ -10,8 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Librerías para PDF y código de barras -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Librería para código de barras -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         /* ===== ESTILOS MEJORADOS (mantienen toda la funcionalidad) ===== */
@@ -960,7 +959,7 @@
 
         // Calculadora
         const calcDisplay = document.getElementById('calcDisplay');
-        let currentValue = '0'; // 🔹 CAMBIADO A 0
+        let currentValue = '0';
 
         // Inventario completo (para matriz)
         let inventario = [];
@@ -1083,7 +1082,7 @@
                     ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
 
                     if (imprimir) {
-                        generarPDF(nuevosRegistros, tipo);
+                        generarHTMLyImprimir(nuevosRegistros, tipo);
                     }
                 } else {
                     alert('Error al guardar en la base de datos: ' + result.error);
@@ -1159,112 +1158,150 @@
             };
         }
 
-     // --- FUNCIÓN GENERAR PDF ---
-function generarPDF(registros, tipo) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: [25, 58]
-    });
+        // --- NUEVA FUNCIÓN: GENERAR HTML E IMPRIMIR (ADAPTABLE A CUALQUIER PAPEL) ---
+        function generarHTMLyImprimir(registros, tipo) {
+            // Crear un documento HTML temporal con una etiqueta por página
+            const ventana = window.open('', '_blank');
+            if (!ventana) {
+                alert('Por favor, permite las ventanas emergentes para imprimir las etiquetas.');
+                return;
+            }
 
-    registros.forEach((registro, index) => {
-        if (index > 0) doc.addPage([25, 58]);
+            // Estilos CSS para la etiqueta (tamaño real: 58mm x 25mm, horizontal)
+            const estilos = `
+                <style>
+                    @page {
+                        size: 58mm 25mm;
+                        margin: 0mm;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                        font-family: 'Arial', 'Helvetica', sans-serif;
+                    }
+                    .etiqueta {
+                        width: 58mm;
+                        height: 25mm;
+                        box-sizing: border-box;
+                        page-break-after: always; /* cada etiqueta en página aparte */
+                        position: relative;
+                        padding: 2mm 1mm;
+                        border: 0px solid #ccc;
+                        overflow: hidden;
+                    }
+                    .contenido {
+                        width: 100%;
+                        height: 100%;
+                        position: relative;
+                    }
+                    .variedad {
+                        font-size: 14pt;
+                        font-weight: bold;
+                        text-align: center;
+                        margin-top: 2mm;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .long-tallos {
+                        position: absolute;
+                        bottom: 2mm;
+                        left: 2mm;
+                        font-size: 12pt;
+                        font-weight: bold;
+                    }
+                    .proveedor-calidad {
+                        position: absolute;
+                        bottom: 2mm;
+                        right: 2mm;
+                        font-size: 8pt;
+                        font-weight: normal;
+                    }
+                    .codigo-barras {
+                        position: absolute;
+                        top: 6mm;
+                        left: 0;
+                        right: 0;
+                        text-align: center;
+                        margin: 0 auto;
+                    }
+                    .codigo-barras canvas {
+                        width: 50mm;
+                        height: 8mm;
+                    }
+                    .codigo-texto {
+                        position: absolute;
+                        bottom: 0mm;
+                        left: 0;
+                        right: 0;
+                        text-align: center;
+                        font-size: 6pt;
+                        font-family: monospace;
+                    }
+                </style>
+            `;
 
-        doc.setFontSize(5);
-        doc.setFont('helvetica', 'bold');
-        doc.text(tipo, 50, 3);
+            ventana.document.write('<html><head><title>Etiquetas ZC ROSES</title>' + estilos + '</head><body>');
 
-        doc.setFontSize(4);
-        doc.setFont('helvetica', 'normal');
-        doc.text('PRODUCT GROWN IN ECUADOR', 16, 3);
-        doc.text('ZC ROSES', 2, 22);
-        doc.text('THE BEST FLOWER FOR YOU', 2, 24);
+            // Por cada registro, generar una etiqueta
+            registros.forEach(registro => {
+                const proveedorIniciales = (registro.proveedor || 'ZC ROSES').split(' ').map(p => p.charAt(0)).join('');
+                const calidadAbr = registro.calidadAbr || 'E';
+                const tallosTexto = `${registro.longitud}/${registro.tallos}`;
 
-        doc.setFont('helvetica', 'bold');
-        let variedad = registro.variedad;
-        let fontSizeVariedad = 14;
-        const maxAnchoVariedad = 40;
-        doc.setFontSize(fontSizeVariedad);
-        let anchoVariedad = doc.getTextWidth(variedad);
-        while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
-            fontSizeVariedad -= 1;
-            doc.setFontSize(fontSizeVariedad);
-            anchoVariedad = doc.getTextWidth(variedad);
+                // Crear contenedor de etiqueta
+                ventana.document.write(`
+                    <div class="etiqueta">
+                        <div class="contenido">
+                            <div class="variedad">${escapeHtml(registro.variedad)}</div>
+                            <div class="long-tallos">${tallosTexto}</div>
+                            <div class="proveedor-calidad">${proveedorIniciales} | ${calidadAbr}</div>
+                            <div class="codigo-barras" id="barcode-${registro.codigo}"></div>
+                            <div class="codigo-texto">${registro.codigo}</div>
+                        </div>
+                    </div>
+                `);
+            });
+
+            ventana.document.write('</body></html>');
+            ventana.document.close();
+
+            // Esperar a que el DOM esté listo para generar los códigos de barras
+            ventana.onload = () => {
+                registros.forEach(registro => {
+                    const canvasContainer = ventana.document.getElementById(`barcode-${registro.codigo}`);
+                    if (canvasContainer) {
+                        const canvas = ventana.document.createElement('canvas');
+                        canvasContainer.appendChild(canvas);
+                        JsBarcode(canvas, registro.codigo, {
+                            format: "CODE128",
+                            width: 2,
+                            height: 25,
+                            displayValue: false,
+                            margin: 0
+                        });
+                    }
+                });
+
+                // Luego de generar los códigos, abrir diálogo de impresión
+                ventana.print();
+                // Opcional: cerrar la ventana después de imprimir (el usuario puede decidir)
+                ventana.onafterprint = () => {
+                    // ventana.close(); // si quieres que se cierre automáticamente
+                };
+            };
         }
-        doc.text(variedad, 29, 9, { align: 'center' });
 
-        doc.setFontSize(14);
-        const tallosTexto = `${registro.longitud}/${registro.tallos}`;
-        doc.text(tallosTexto, 3, 16);
-
-        const proveedor = registro.proveedor || 'ZC ROSES';
-        const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
-        const calidadAbr = registro.calidadAbr || 'E';
-        doc.setFontSize(6);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${iniciales} |  ${calidadAbr}`, 16, 22);
-
-        const canvas = document.createElement('canvas');
-        JsBarcode(canvas, registro.codigo, {
-            format: "CODE128",
-            width: 2,
-            height: 2,
-            displayValue: false,
-            margin: 0
-        });
-        const imgData = canvas.toDataURL('image/png');
-        const imgAncho = 35;
-        const imgX = (68 - imgAncho) / 2;
-        doc.addImage(imgData, 'PNG', imgX, 12, imgAncho, 8);
-
-        doc.setFontSize(5);
-        const codigoTexto = registro.codigo;
-        const anchoCodigo = doc.getTextWidth(codigoTexto);
-        const codigoX = (80 - anchoCodigo) / 2;
-        doc.text(codigoTexto, codigoX, 22);
-    });
-
-    // ===== Cargar PDF en iframe oculto y abrir diálogo de impresión =====
-    const pdfBlob = doc.output('blob'); // Convertir el PDF a un objeto Blob
-    const pdfUrl = URL.createObjectURL(pdfBlob); // Crear una URL temporal
-
-    // Crear un iframe invisible (fuera de la pantalla)
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-
-    // Cuando el iframe cargue el PDF, ejecutamos print()
-    iframe.onload = function() {
-        try {
-            // Enfocar el iframe (necesario en algunos navegadores)
-            this.contentWindow.focus();
-            // Abrir el diálogo de impresión del navegador
-            this.contentWindow.print();
-        } catch (error) {
-            console.error('Error al imprimir:', error);
-        } finally {
-            // Limpiar el iframe y la URL después de un tiempo (para que la impresión se inicie)
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-                URL.revokeObjectURL(pdfUrl);
-            }, 2000);
-        }
-    };
-
-    iframe.src = pdfUrl; // Inicia la carga del PDF en el iframe
-}
-
-        // Función auxiliar para limpiar la fecha (quitar la parte de hora si existe)
-        function limpiarFecha(fechaStr) {
-            if (!fechaStr) return '';
-            // Si viene con formato ISO (YYYY-MM-DDTHH:MM:SS), tomamos solo la parte antes de la T
-            return fechaStr.split('T')[0];
+        // Función auxiliar para escapar HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
 
         function actualizarHistorial() {
@@ -1278,16 +1315,16 @@ function generarPDF(registros, tipo) {
                 const partes = fechaLimpia.split('-');
                 const fechaFormateada = partes.length === 3 ? `${partes[1]}/${partes[2]}/${partes[0]}` : fechaLimpia;
                 html += `<tr>
-                    <td>${fechaFormateada}</td>
-                    <td>${item.variedad}</td>
-                    <td>${item.longitud}</td>
-                    <td>${item.tallos}</td>
-                    <td>${item.empaque}</td>
-                    <td>${item.calidad}</td>
-                    <td>${item.ptoCorte}</td>
-                    <td>${item.codigo}</td>
-                    <td><i class="fas fa-trash-alt delete-btn" onclick="eliminarRegistro('${item.codigo}', ${item.id})"></i></td>
-                </tr>`;
+                            <td>${fechaFormateada}</td>
+                            <td>${item.variedad}</td>
+                            <td>${item.longitud}</td>
+                            <td>${item.tallos}</td>
+                            <td>${item.empaque}</td>
+                            <td>${item.calidad}</td>
+                            <td>${item.ptoCorte}</td>
+                            <td>${item.codigo}</td>
+                            <td><i class="fas fa-trash-alt delete-btn" onclick="eliminarRegistro('${item.codigo}', ${item.id})"></i></td>
+                        </tr>`;
             });
             historialBody.innerHTML = html;
         }
@@ -1298,25 +1335,27 @@ function generarPDF(registros, tipo) {
             totalTallosMatriz.innerText = inventario.reduce((acc, i) => acc + i.tallos, 0);
         }
 
-                function renderizarMatriz() {
+        function limpiarFecha(fechaStr) {
+            if (!fechaStr) return '';
+            return fechaStr.split('T')[0];
+        }
+
+        function renderizarMatriz() {
             const desde = fechaDesdeMatriz.value;
             const hasta = fechaHastaMatriz.value;
             const calidadFiltro = filterCalidadMatriz.value;
             const busqueda = searchInputMatriz.value.toLowerCase();
 
-            // Filtrar usando solo la parte de la fecha (sin hora)
             const filtrados = inventario.filter(i => {
-                const fechaItem = limpiarFecha(i.fecha); // ← importante: quita la hora
+                const fechaItem = limpiarFecha(i.fecha);
                 if (desde && fechaItem < desde) return false;
                 if (hasta && fechaItem > hasta) return false;
                 if (calidadFiltro && i.calidadAbr !== calidadFiltro) return false;
                 return true;
             });
 
-            // Obtener fechas únicas (ya limpias)
             const fechas = [...new Set(filtrados.map(i => limpiarFecha(i.fecha)))].sort();
 
-            // Agrupar por clave (variedad, longitud, tallos, empaque, calidad, corte)
             const grupos = {};
             filtrados.forEach(i => {
                 const fechaLimpia = limpiarFecha(i.fecha);
@@ -1326,16 +1365,14 @@ function generarPDF(registros, tipo) {
                 grupos[key].fechas[fechaLimpia]++;
             });
 
-            // Filtrar por búsqueda de variedad
             const gruposArray = Object.values(grupos).filter(g => g.variedad.toLowerCase().includes(busqueda));
             gruposArray.sort((a, b) => a.variedad.localeCompare(b.variedad) || parseInt(a.longitud) - parseInt(b.longitud));
 
-            // Construir encabezados de la tabla
             let thead = '<tr><th>Variedades</th><th>Emp</th><th>Cal</th><th>Pto</th>';
             fechas.forEach(f => {
                 const partes = f.split('-');
                 if (partes.length === 3) {
-                    thead += `<th>${partes[1]}/${partes[2]}</th>`; // formato MM/DD
+                    thead += `<th>${partes[1]}/${partes[2]}</th>`;
                 } else {
                     thead += `<th>${f}</th>`;
                 }
@@ -1348,7 +1385,6 @@ function generarPDF(registros, tipo) {
                 return;
             }
 
-            // Generar filas de la tabla
             let tbody = '', totales = {}, totalGlobal = 0;
             fechas.forEach(f => totales[f] = 0);
             gruposArray.forEach(g => {
@@ -1365,7 +1401,6 @@ function generarPDF(registros, tipo) {
                 totalGlobal += suma;
             });
 
-            // Fila de totales
             let totalRow = '<tr class="total-row"><td colspan="4">Totales:</td>';
             fechas.forEach(f => totalRow += `<td><strong>${totales[f]}</strong></td>`);
             totalRow += `<td><strong>${totalGlobal}</strong></td></tr>`;
@@ -1382,7 +1417,6 @@ function generarPDF(registros, tipo) {
             alert(`${cant} etiqueta(s) registrada(s).`);
         }
 
-        // --- NUEVA FUNCIÓN IMPRIMIR (SOLO PDF, SIN GUARDAR) ---
         function imprimirEtiquetas() {
             let cant = parseInt(currentValue, 10);
             if (!cant) {
@@ -1394,7 +1428,7 @@ function generarPDF(registros, tipo) {
             const registrosParaImprimir = [];
 
             for (let i = 0; i < cant; i++) {
-                const codigo = generarCodigoTemporal(); // código aleatorio
+                const codigo = generarCodigoTemporal();
                 registrosParaImprimir.push({
                     codigo: codigo,
                     fecha: datosBase.fecha,
@@ -1408,8 +1442,8 @@ function generarPDF(registros, tipo) {
                     tallos: parseInt(datosBase.tallos)
                 });
             }
-            generarPDF(registrosParaImprimir, 'IMP');
-            resetearContador(); // para poner el display a 0 después de imprimir
+            generarHTMLyImprimir(registrosParaImprimir, 'IMP');
+            resetearContador();
         }
 
         btnRegistrar.addEventListener('click', e => { e.preventDefault(); registrarEtiquetas(); });
