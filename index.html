@@ -10,7 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Librería para código de barras -->
+    <!-- Librerías para PDF y código de barras -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         /* ===== ESTILOS MEJORADOS (mantienen toda la funcionalidad) ===== */
@@ -959,7 +960,7 @@
 
         // Calculadora
         const calcDisplay = document.getElementById('calcDisplay');
-        let currentValue = '0';
+        let currentValue = '0'; // 🔹 CAMBIADO A 0
 
         // Inventario completo (para matriz)
         let inventario = [];
@@ -1082,7 +1083,7 @@
                     ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
 
                     if (imprimir) {
-                        generarHTMLyImprimir(nuevosRegistros, tipo);
+                        generarPDFeImprimir(nuevosRegistros, tipo);
                     }
                 } else {
                     alert('Error al guardar en la base de datos: ' + result.error);
@@ -1158,174 +1159,84 @@
             };
         }
 
-        // --- FUNCIÓN PARA GENERAR HTML CON EL DISEÑO ORIGINAL DEL PDF (ADAPTABLE A CUALQUIER PAPEL) ---
-        function generarHTMLyImprimir(registros, tipo) {
-            const ventana = window.open('', '_blank');
-            if (!ventana) {
-                alert('Por favor, permite las ventanas emergentes para imprimir las etiquetas.');
-                return;
-            }
+        // --- FUNCIÓN ORIGINAL DE GENERACIÓN DE PDF (exactamente igual que antes) ---
+        function generarPDFeImprimir(registros, tipo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [25, 58]
+            });
 
-            // Estilos que replican exactamente el diseño del PDF original
-            const estilos = `
-                <style>
-                    @page {
-                        size: 58mm 25mm;
-                        margin: 0mm;
-                    }
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        background: white;
-                        font-family: Arial, Helvetica, sans-serif;
-                    }
-                    .etiqueta {
-                        width: 58mm;
-                        height: 25mm;
-                        box-sizing: border-box;
-                        page-break-after: always;
-                        position: relative;
-                        padding: 0;
-                        margin: 0;
-                        overflow: hidden;
-                    }
-                    /* Posiciones exactas según el PDF */
-                    .texto-producto {
-                        position: absolute;
-                        top: 1mm;
-                        left: 2mm;
-                        font-size: 5pt;
-                        font-weight: normal;
-                        color: black;
-                    }
-                    .tipo-etiqueta {
-                        position: absolute;
-                        top: 1mm;
-                        right: 2mm;
-                        font-size: 5pt;
-                        font-weight: bold;
-                        color: black;
-                    }
-                    .variedad {
-                        position: absolute;
-                        top: 7mm;
-                        left: 0;
-                        right: 0;
-                        text-align: center;
-                        font-size: 14pt;
-                        font-weight: bold;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        padding: 0 2mm;
-                    }
-                    .long-tallos {
-                        position: absolute;
-                        bottom: 2mm;
-                        left: 2mm;
-                        font-size: 12pt;
-                        font-weight: bold;
-                    }
-                    .proveedor-calidad {
-                        position: absolute;
-                        bottom: 2mm;
-                        right: 2mm;
-                        font-size: 8pt;
-                        font-weight: normal;
-                    }
-                    .codigo-barras {
-                        position: absolute;
-                        top: 12mm;
-                        left: 0;
-                        right: 0;
-                        text-align: center;
-                    }
-                    .codigo-barras canvas {
-                        width: 35mm;
-                        height: 8mm;
-                    }
-                    .codigo-texto {
-                        position: absolute;
-                        bottom: 1mm;
-                        left: 0;
-                        right: 0;
-                        text-align: center;
-                        font-size: 5pt;
-                        font-family: monospace;
-                    }
-                    /* Texto adicional que estaba en el PDF (ZC ROSES y THE BEST...) */
-                    .zc-roses {
-                        position: absolute;
-                        bottom: 10mm;
-                        left: 2mm;
-                        font-size: 6pt;
-                        font-weight: normal;
-                    }
-                    .the-best {
-                        position: absolute;
-                        bottom: 8mm;
-                        left: 2mm;
-                        font-size: 6pt;
-                        font-weight: normal;
-                    }
-                </style>
-            `;
+            registros.forEach((registro, index) => {
+                if (index > 0) doc.addPage([25, 58]);
 
-            ventana.document.write('<html><head><title>Etiquetas ZC ROSES</title>' + estilos + '</head><body>');
+                doc.setFontSize(5);
+                doc.setFont('helvetica', 'bold');
+                doc.text(tipo, 50, 3);
 
-            registros.forEach(registro => {
-                const proveedorIniciales = (registro.proveedor || 'ZC ROSES').split(' ').map(p => p.charAt(0)).join('');
-                const calidadAbr = registro.calidadAbr || 'E';
+                doc.setFontSize(4);
+                doc.setFont('helvetica', 'normal');
+                doc.text('PRODUCT GROWN IN ECUADOR', 16, 3);
+                doc.text('ZC ROSES', 2, 22);
+                doc.text('THE BEST FLOWER FOR YOU', 2, 24);
+
+                doc.setFont('helvetica', 'bold');
+                let variedad = registro.variedad;
+                let fontSizeVariedad = 14;
+                const maxAnchoVariedad = 40;
+                doc.setFontSize(fontSizeVariedad);
+                let anchoVariedad = doc.getTextWidth(variedad);
+                while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
+                    fontSizeVariedad -= 1;
+                    doc.setFontSize(fontSizeVariedad);
+                    anchoVariedad = doc.getTextWidth(variedad);
+                }
+                doc.text(variedad, 29, 9, { align: 'center' });
+
+                doc.setFontSize(14);
                 const tallosTexto = `${registro.longitud}/${registro.tallos}`;
-                const tipoMostrar = tipo || ''; // "IR" o "IMP" según corresponda
+                doc.text(tallosTexto, 3, 16);
 
-                ventana.document.write(`
-                    <div class="etiqueta">
-                        <div class="texto-producto">PRODUCT GROWN IN ECUADOR</div>
-                        <div class="tipo-etiqueta">${escapeHtml(tipoMostrar)}</div>
-                        <div class="variedad">${escapeHtml(registro.variedad)}</div>
-                        <div class="long-tallos">${tallosTexto}</div>
-                        <div class="proveedor-calidad">${escapeHtml(proveedorIniciales)} | ${calidadAbr}</div>
-                        <div class="zc-roses">ZC ROSES</div>
-                        <div class="the-best">THE BEST FLOWER FOR YOU</div>
-                        <div class="codigo-barras" id="barcode-${registro.codigo}"></div>
-                        <div class="codigo-texto">${registro.codigo}</div>
-                    </div>
-                `);
-            });
+                const proveedor = registro.proveedor || 'ZC ROSES';
+                const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
+                const calidadAbr = registro.calidadAbr || 'E';
+                doc.setFontSize(6);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${iniciales} |  ${calidadAbr}`, 16, 22);
 
-            ventana.document.write('</body></html>');
-            ventana.document.close();
-
-            ventana.onload = () => {
-                registros.forEach(registro => {
-                    const container = ventana.document.getElementById(`barcode-${registro.codigo}`);
-                    if (container) {
-                        const canvas = ventana.document.createElement('canvas');
-                        container.appendChild(canvas);
-                        JsBarcode(canvas, registro.codigo, {
-                            format: "CODE128",
-                            width: 2,
-                            height: 25,
-                            displayValue: false,
-                            margin: 0
-                        });
-                    }
+                const canvas = document.createElement('canvas');
+                JsBarcode(canvas, registro.codigo, {
+                    format: "CODE128",
+                    width: 2,
+                    height: 2,
+                    displayValue: false,
+                    margin: 0
                 });
-                ventana.print();
-                // Opcional: cerrar ventana después de imprimir (se puede activar si se desea)
-                // ventana.onafterprint = () => ventana.close();
-            };
-        }
+                const imgData = canvas.toDataURL('image/png');
+                const imgAncho = 35;
+                const imgX = (68 - imgAncho) / 2;
+                doc.addImage(imgData, 'PNG', imgX, 12, imgAncho, 8);
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
+                doc.setFontSize(5);
+                const codigoTexto = registro.codigo;
+                const anchoCodigo = doc.getTextWidth(codigoTexto);
+                const codigoX = (80 - anchoCodigo) / 2;
+                doc.text(codigoTexto, codigoX, 22);
             });
+
+            // Abrir el PDF en una nueva pestaña y lanzar la impresión
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const ventana = window.open(pdfUrl, '_blank');
+            if (ventana) {
+                // Esperamos a que el PDF se cargue y luego llamamos a print()
+                ventana.onload = function() {
+                    ventana.print();
+                };
+            } else {
+                alert('Por favor, permite las ventanas emergentes para imprimir.');
+            }
         }
 
         function actualizarHistorial() {
@@ -1466,7 +1377,7 @@
                     tallos: parseInt(datosBase.tallos)
                 });
             }
-            generarHTMLyImprimir(registrosParaImprimir, 'IMP');
+            generarPDFeImprimir(registrosParaImprimir, 'IMP');
             resetearContador();
         }
 
