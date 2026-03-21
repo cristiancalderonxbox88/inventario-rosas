@@ -13,8 +13,10 @@
     <!-- Librerías para PDF y código de barras -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- SheetJS para exportar a XLSX -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* ===== ESTILOS MEJORADOS ===== */
+        /* ===== ESTILOS (igual que antes) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -43,7 +45,6 @@
             overflow-y: auto;
         }
 
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -96,7 +97,6 @@
             color: #f5e6b3;
         }
 
-        /* Pestañas */
         .tabs {
             display: flex;
             gap: 8px;
@@ -140,7 +140,6 @@
             display: block;
         }
 
-        /* Registro: fila formulario + teclado */
         .registro-row {
             display: flex;
             gap: 20px;
@@ -148,7 +147,6 @@
             flex-wrap: wrap;
         }
 
-        /* Formulario */
         .form-card {
             background: #f9fdf9;
             border-radius: 28px;
@@ -223,7 +221,6 @@
             background-size: 14px;
         }
 
-        /* Teclado mejorado */
         .teclado-card {
             background: #f0f8f0;
             border-radius: 28px;
@@ -334,7 +331,7 @@
             margin-top: 10px;
         }
 
-        .btn-primary, .btn-secondary {
+        .btn-primary, .btn-secondary, .btn-excel {
             border-radius: 50px;
             padding: 14px 0;
             font-weight: 600;
@@ -370,7 +367,15 @@
             background: #f0faf0;
         }
 
-        /* Historial y Matriz */
+        .btn-excel {
+            background: #1f724c;
+            border: none;
+            color: white;
+        }
+        .btn-excel:hover {
+            background: #2a8a5e;
+        }
+
         .historial-card, .inventory-header {
             background: #f9fdf9;
             border-radius: 28px;
@@ -487,26 +492,6 @@
             outline: none;
         }
 
-        .btn-clear {
-            background: white;
-            border: 1px solid #c86c6c;
-            border-radius: 40px;
-            padding: 8px 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: #c86c6c;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .btn-clear:hover {
-            background: #ffe6e6;
-        }
-
-        /* Tablas */
         .table-container {
             overflow-x: auto;
             border-radius: 20px;
@@ -567,7 +552,6 @@
             color: #a14a4a;
         }
 
-        /* Footer */
         .footer-info {
             margin-top: 24px;
             display: flex;
@@ -589,7 +573,7 @@
             color: #1e4a2e;
         }
 
-        /* ===== ESTILOS PARA TOAST NOTIFICATIONS ===== */
+        /* Toast */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -663,46 +647,23 @@
             animation: fadeOut 0.3s ease-out forwards;
         }
 
-        /* Responsive */
         @media (max-width: 900px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .registro-row {
-                flex-direction: column;
-            }
-            .app-container {
-                padding: 18px;
-            }
-            .key-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 1.4rem;
-            }
-            .toast-container {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-            }
-            .toast {
-                max-width: calc(100% - 20px);
-            }
+            .form-grid { grid-template-columns: 1fr; }
+            .registro-row { flex-direction: column; }
+            .app-container { padding: 18px; }
+            .key-btn { width: 60px; height: 60px; font-size: 1.4rem; }
+            .toast-container { top: 10px; right: 10px; left: 10px; }
+            .toast { max-width: calc(100% - 20px); }
         }
 
         @media (max-width: 600px) {
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .stats-cards {
-                flex-direction: column;
-            }
+            .header { flex-direction: column; align-items: stretch; }
+            .stats-cards { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 <div class="app-container">
-    <!-- Cabecera -->
     <div class="header">
         <div class="date-box">
             <i class="fas fa-calendar-alt" style="color:#4f6f8f;"></i> 
@@ -713,145 +674,27 @@
         </div>
     </div>
 
-    <!-- Pestañas -->
     <div class="tabs">
         <button class="tab-btn active" id="tabRegistroBtn"><i class="fas fa-pencil-alt"></i> Registro</button>
         <button class="tab-btn" id="tabHistorialBtn"><i class="fas fa-history"></i> Historial</button>
         <button class="tab-btn" id="tabMatrizBtn"><i class="fas fa-table"></i> Inventario Matriz</button>
     </div>
 
-    <!-- Contenido Registro -->
     <div class="tab-content active" id="tabRegistro">
         <div class="registro-row">
-            <!-- Formulario izquierda -->
             <div class="form-card">
-                <div class="form-title">
-                    <i class="fas fa-tag" style="color:#1e3a5f;"></i> Datos de la etiqueta
-                </div>
+                <div class="form-title"><i class="fas fa-tag"></i> Datos de la etiqueta</div>
                 <div class="form-grid">
-                    <div class="form-row">
-                        <label><i class="fas fa-truck"></i> Proveedor</label>
-                        <select class="form-control" id="proveedor">
-                            <option value="ZC ROSES" selected>ZC ROSES</option>
-                            <option value="ROSES FARM">ROSES FARM</option>
-                            <option value="FLOWER VALLEY">FLOWER VALLEY</option>
-                            <option value="PETALOS SA">PETALOS SA</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label><i class="fas fa-certificate"></i> Calidad</label>
-                        <select class="form-control" id="calidad">
-                            <option value="Exportacion" selected>Exportación</option>
-                            <option value="Clase b">Clase b</option>
-                            <option value="nacional">nacional</option>
-                            <option value="otro">otro</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label><i class="fas fa-rose"></i> Variedad</label>
-                        <select class="form-control" id="variedadSelect">
-                            <option value="BE SWEET" selected>BE SWEET</option>
-                            <option value="BOULEVARD">BOULEVARD</option>
-                            <option value="BRIGHTON">BRIGHTON</option>
-                            <option value="BARISTA">BARISTA</option>
-                            <option value="CANDLELIGHT">CANDLELIGHT</option>
-                            <option value="CANDY X-PRESSION">CANDY X-PRESSION</option>
-                            <option value="CARPE DIEM">CARPE DIEM</option>
-                            <option value="COFFE BREAK">COFFE BREAK</option>
-                            <option value="COTTON XPRESSION">COTTON XPRESSION</option>
-                            <option value="COUNTRY BLUES">COUNTRY BLUES</option>
-                            <option value="DEEP PURPLE">DEEP PURPLE</option>
-                            <option value="ESPERANCE">ESPERANCE</option>
-                            <option value="EXPLORER">EXPLORER</option>
-                            <option value="FULL MONTY">FULL MONTY</option>
-                            <option value="FREE SPIRIT">FREE SPIRIT</option>
-                            <option value="FREEDOM">FREEDOM</option>
-                            <option value="FRUTTETO">FRUTTETO</option>
-                            <option value="GOTCHA">GOTCHA</option>
-                            <option value="HEARTS">HEARTS</option>
-                            <option value="HERMOSA">HERMOSA</option>
-                            <option value="HIGH MAGIC">HIGH MAGIC</option>
-                            <option value="HOT EXPLORER">HOT EXPLORER</option>
-                            <option value="JACARANDA">JACARANDA</option>
-                            <option value="KAHALA">KAHALA</option>
-                            <option value="LOLA">LOLA</option>
-                            <option value="LUCIANO">LUCIANO</option>
-                            <option value="MAGIC TIMES">MAGIC TIMES</option>
-                            <option value="MANDALA">MANDALA</option>
-                            <option value="MANDARIN XPRESSION">MANDARIN XPRESSION</option>
-                            <option value="MOONSTONE">MOONSTONE</option>
-                            <option value="MOMENTUM">MOMENTUM</option>
-                            <option value="MONDIAL">MONDIAL</option>
-                            <option value="NINA">NINA</option>
-                            <option value="NOVIA">NOVIA</option>
-                            <option value="ORANGE CRUSH">ORANGE CRUSH</option>
-                            <option value="PALOMA">PALOMA</option>
-                            <option value="PINK FLOYD">PINK FLOYD</option>
-                            <option value="PINK X-PRESSION">PINK X-PRESSION</option>
-                            <option value="PLAYA BLANCA">PLAYA BLANCA</option>
-                            <option value="PANDORA">PANDORA</option>
-                            <option value="PINK MONDIAL">PINK MONDIAL</option>
-                            <option value="PINK PUMA">PINK PUMA</option>
-                            <option value="POMAROSA">POMAROSA</option>
-                            <option value="POWDER PUFF">POWDER PUFF</option>
-                            <option value="PRINCESS CROWN">PRINCESS CROWN</option>
-                            <option value="PROUD">PROUD</option>
-                            <option value="QUICKSAND">QUICKSAND</option>
-                            <option value="RED PANTHER">RED PANTHER</option>
-                            <option value="SHIMMER">SHIMMER</option>
-                            <option value="SHOCKING BLUE">SHOCKING BLUE</option>
-                            <option value="SILANTOI">SILANTOI</option>
-                            <option value="SWEET BEAT">SWEET BEAT</option>
-                            <option value="SWEET UNIQUE">SWEET UNIQUE</option>
-                            <option value="TIBET">TIBET</option>
-                            <option value="TIFFANY">TIFFANY</option>
-                            <option value="VENDELA">VENDELA</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label><i class="fas fa-box"></i> Empaque</label>
-                        <select class="form-control" id="empaque">
-                            <option value="STA CLA" selected>ZC Roses</option>
-                            <option value="BUNCH">BUNCH</option>
-                            <option value="SLEEVE">SLEEVE</option>
-                            <option value="BOX">BOX</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label><i class="fas fa-cut"></i> Pto Corte</label>
-                        <select class="form-control" id="ptoCorte">
-                            <option value="RS" selected>RS</option>
-                            <option value="RC">AM</option>
-                            <option value="RB">EU</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label><i class="fas fa-ruler"></i> Longitud</label>
-                        <select class="form-control" id="longitud">
-                            <option value="40">40</option><option value="50">50</option><option value="60">60</option>
-                            <option value="70">70</option><option value="80">80</option><option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label><i class="fas fa-leaf"></i> Tallos</label>
-                        <select class="form-control" id="tallos">
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                            <option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                            <option value="13">13</option><option value="14">14</option><option value="15">15</option>
-                            <option value="16">16</option><option value="17">17</option><option value="18">18</option>
-                            <option value="19">19</option><option value="20">20</option><option value="21">21</option>
-                            <option value="22">22</option><option value="23">23</option><option value="24">24</option>
-                            <option value="25" selected>25</option><option value="26">26</option><option value="27">27</option>
-                            <option value="28">28</option><option value="29">29</option><option value="30">30</option>
-                        </select>
-                    </div>
+                    <div class="form-row"><label><i class="fas fa-truck"></i> Proveedor</label><select class="form-control" id="proveedor"><option value="ZC ROSES" selected>ZC ROSES</option><option value="ROSES FARM">ROSES FARM</option><option value="FLOWER VALLEY">FLOWER VALLEY</option><option value="PETALOS SA">PETALOS SA</option></select></div>
+                    <div class="form-row"><label><i class="fas fa-certificate"></i> Calidad</label><select class="form-control" id="calidad"><option value="Exportacion" selected>Exportación</option><option value="Clase b">Clase b</option><option value="nacional">nacional</option><option value="otro">otro</option></select></div>
+                    <div class="form-row"><label><i class="fas fa-rose"></i> Variedad</label><select class="form-control" id="variedadSelect"><option value="BE SWEET" selected>BE SWEET</option><option value="BOULEVARD">BOULEVARD</option><option value="BRIGHTON">BRIGHTON</option><option value="BARISTA">BARISTA</option><option value="CANDLELIGHT">CANDLELIGHT</option><option value="CANDY X-PRESSION">CANDY X-PRESSION</option><option value="CARPE DIEM">CARPE DIEM</option><option value="COFFE BREAK">COFFE BREAK</option><option value="COTTON XPRESSION">COTTON XPRESSION</option><option value="COUNTRY BLUES">COUNTRY BLUES</option><option value="DEEP PURPLE">DEEP PURPLE</option><option value="ESPERANCE">ESPERANCE</option><option value="EXPLORER">EXPLORER</option><option value="FULL MONTY">FULL MONTY</option><option value="FREE SPIRIT">FREE SPIRIT</option><option value="FREEDOM">FREEDOM</option><option value="FRUTTETO">FRUTTETO</option><option value="GOTCHA">GOTCHA</option><option value="HEARTS">HEARTS</option><option value="HERMOSA">HERMOSA</option><option value="HIGH MAGIC">HIGH MAGIC</option><option value="HOT EXPLORER">HOT EXPLORER</option><option value="JACARANDA">JACARANDA</option><option value="KAHALA">KAHALA</option><option value="LOLA">LOLA</option><option value="LUCIANO">LUCIANO</option><option value="MAGIC TIMES">MAGIC TIMES</option><option value="MANDALA">MANDALA</option><option value="MANDARIN XPRESSION">MANDARIN XPRESSION</option><option value="MOONSTONE">MOONSTONE</option><option value="MOMENTUM">MOMENTUM</option><option value="MONDIAL">MONDIAL</option><option value="NINA">NINA</option><option value="NOVIA">NOVIA</option><option value="ORANGE CRUSH">ORANGE CRUSH</option><option value="PALOMA">PALOMA</option><option value="PINK FLOYD">PINK FLOYD</option><option value="PINK X-PRESSION">PINK X-PRESSION</option><option value="PLAYA BLANCA">PLAYA BLANCA</option><option value="PANDORA">PANDORA</option><option value="PINK MONDIAL">PINK MONDIAL</option><option value="PINK PUMA">PINK PUMA</option><option value="POMAROSA">POMAROSA</option><option value="POWDER PUFF">POWDER PUFF</option><option value="PRINCESS CROWN">PRINCESS CROWN</option><option value="PROUD">PROUD</option><option value="QUICKSAND">QUICKSAND</option><option value="RED PANTHER">RED PANTHER</option><option value="SHIMMER">SHIMMER</option><option value="SHOCKING BLUE">SHOCKING BLUE</option><option value="SILANTOI">SILANTOI</option><option value="SWEET BEAT">SWEET BEAT</option><option value="SWEET UNIQUE">SWEET UNIQUE</option><option value="TIBET">TIBET</option><option value="TIFFANY">TIFFANY</option><option value="VENDELA">VENDELA</option></select></div>
+                    <div class="form-row"><label><i class="fas fa-box"></i> Empaque</label><select class="form-control" id="empaque"><option value="STA CLA" selected>ZC Roses</option><option value="BUNCH">BUNCH</option><option value="SLEEVE">SLEEVE</option><option value="BOX">BOX</option></select></div>
+                    <div class="form-row"><label><i class="fas fa-cut"></i> Pto Corte</label><select class="form-control" id="ptoCorte"><option value="RS" selected>RS</option><option value="RC">AM</option><option value="RB">EU</option></select></div>
+                    <div class="form-row"><label><i class="fas fa-ruler"></i> Longitud</label><select class="form-control" id="longitud"><option value="40">40</option><option value="50">50</option><option value="60">60</option><option value="70">70</option><option value="80">80</option><option value="90">90</option><option value="100">100</option></select></div>
+                    <div class="form-row"><label><i class="fas fa-leaf"></i> Tallos</label><select class="form-control" id="tallos"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25" selected>25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option></select></div>
                 </div>
             </div>
 
-            <!-- Teclado profesional -->
             <div class="teclado-card">
                 <div class="calculator-display" id="calcDisplay">0</div>
                 <div class="keypad-grid">
@@ -884,110 +727,54 @@
         </div>
     </div>
 
-    <!-- Contenido Historial -->
     <div class="tab-content" id="tabHistorial">
         <div class="historial-card">
-            <div class="historial-title">
-                <i class="fas fa-history" style="color:#1e3a5f;"></i> Últimos registros (máx 20)
-            </div>
+            <div class="historial-title"><i class="fas fa-history"></i> Últimos registros (máx 20)</div>
             <div class="historial-tabla">
                 <table id="historialTable">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Variedad</th>
-                            <th>Long</th>
-                            <th>Tallos</th>
-                            <th>Empaque</th>
-                            <th>Calidad</th>
-                            <th>Corte</th>
-                            <th>Código</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="historialBody">
-                        <tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>
-                    </tbody>
+                    <thead><tr><th>Fecha</th><th>Variedad</th><th>Long</th><th>Tallos</th><th>Empaque</th><th>Calidad</th><th>Corte</th><th>Código</th><th></th></thead>
+                    <tbody id="historialBody"><tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Contenido Inventario Matriz -->
     <div class="tab-content" id="tabMatriz">
         <div class="inventory-header">
             <div class="stats-cards">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-archive"></i></div>
-                    <div class="stat-info">
-                        <h3>Total registros</h3>
-                        <p id="totalRegistrosMatriz">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-rose"></i></div>
-                    <div class="stat-info">
-                        <h3>Variedades</h3>
-                        <p id="totalVariedadesMatriz">0</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-tag"></i></div>
-                    <div class="stat-info">
-                        <h3>Total tallos</h3>
-                        <p id="totalTallosMatriz">0</p>
-                    </div>
-                </div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-archive"></i></div><div class="stat-info"><h3>Total registros</h3><p id="totalRegistrosMatriz">0</p></div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-rose"></i></div><div class="stat-info"><h3>Variedades</h3><p id="totalVariedadesMatriz">0</p></div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-tag"></i></div><div class="stat-info"><h3>Total tallos</h3><p id="totalTallosMatriz">0</p></div></div>
             </div>
-            <button class="btn-clear" id="btnClearInventoryMatriz"><i class="fas fa-trash-alt"></i> Limpiar inventario</button>
+            <!-- Botón Limpiar inventario eliminado -->
         </div>
 
         <div class="filters">
-            <div class="filter-group">
-                <i class="fas fa-calendar" style="color:#6b7b8f;"></i>
-                <input type="date" id="fechaDesdeMatriz" value="2026-03-06">
-                <span>a</span>
-                <input type="date" id="fechaHastaMatriz" value="2026-03-11">
-            </div>
-            <select class="filter-select" id="filterCalidadMatriz">
-                <option value="">Todas</option>
-                <option value="E">E</option><option value="P">P</option><option value="S">S</option><option value="Std">Std</option>
-            </select>
-            <div class="search-box">
-                <i class="fas fa-search" style="color:#94a3b8;"></i>
-                <input type="text" id="searchInputMatriz" placeholder="Buscar variedad">
-            </div>
+            <div class="filter-group"><i class="fas fa-calendar"></i><input type="date" id="fechaDesdeMatriz" value="2026-03-06"><span>a</span><input type="date" id="fechaHastaMatriz" value="2026-03-11"></div>
+            <select class="filter-select" id="filterCalidadMatriz"><option value="">Todas</option><option value="E">E</option><option value="B">B</option><option value="N">N</option><option value="O">O</option></select>
+            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInputMatriz" placeholder="Buscar variedad"></div>
+            <button class="btn-excel" id="btnExportExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
         </div>
 
         <div class="table-container">
-            <table id="matrizTable">
-                <thead id="matrizThead"></thead>
-                <tbody id="matrizTbody">
-                    <tr class="empty-row"><td colspan="100">Cargando...</td></tr>
-                </tbody>
-            </table>
+            <table id="matrizTable"><thead id="matrizThead"></thead><tbody id="matrizTbody"><tr class="empty-row"><td colspan="100">Cargando...</td></tr></tbody></table>
         </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer-info">
-        <div class="badge"><i class="fas fa-tag" style="color:#1e3a5f;"></i> Lote: <span id="loteDisplay">RS-40-BE</span></div>
+        <div class="badge"><i class="fas fa-tag"></i> Lote: <span id="loteDisplay">RS-40-BE</span></div>
         <div class="badge"><i class="fas fa-temperature-low"></i> Cámara: 3.2°C</div>
         <div class="badge"><i class="fas fa-clock"></i> Último registro: <span id="ultimoRegistro">--:--</span></div>
         <div><i class="fas fa-check-circle" style="color:#2b6e3b;"></i> Activo</div>
     </div>
 </div>
 
-<!-- Contenedor para notificaciones toast -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
     (function() {
-        
-        // --- CONFIGURACIÓN DE LA API ---
         const API_URL = 'https://inventario-rosas-backend-production.up.railway.app/api/ramos';
 
-        // Elementos del formulario
         const fechaInput = document.getElementById('fechaRegistro');
         const proveedorSelect = document.getElementById('proveedor');
         const calidadSelect = document.getElementById('calidad');
@@ -1003,7 +790,6 @@
         const irButton = document.getElementById('irButton');
         const backspaceButton = document.getElementById('backspaceButton');
 
-        // Elementos de matriz
         const fechaDesdeMatriz = document.getElementById('fechaDesdeMatriz');
         const fechaHastaMatriz = document.getElementById('fechaHastaMatriz');
         const filterCalidadMatriz = document.getElementById('filterCalidadMatriz');
@@ -1013,45 +799,26 @@
         const totalRegistrosMatriz = document.getElementById('totalRegistrosMatriz');
         const totalVariedadesMatriz = document.getElementById('totalVariedadesMatriz');
         const totalTallosMatriz = document.getElementById('totalTallosMatriz');
-        const btnClearInventoryMatriz = document.getElementById('btnClearInventoryMatriz');
+        const btnExportExcel = document.getElementById('btnExportExcel');
 
-        // Contenedor de toasts
         const toastContainer = document.getElementById('toastContainer');
 
-        // --- FUNCIÓN PARA MOSTRAR TOAST ---
         function mostrarToast(mensaje, tipo = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${tipo}`;
-            
-            let icono = '';
-            if (tipo === 'success') icono = '<i class="fas fa-check-circle"></i>';
-            else if (tipo === 'error') icono = '<i class="fas fa-exclamation-circle"></i>';
-            else icono = '<i class="fas fa-info-circle"></i>';
-            
-            toast.innerHTML = `
-                ${icono}
-                <span class="toast-message">${mensaje}</span>
-            `;
-            
+            let icono = tipo === 'success' ? '<i class="fas fa-check-circle"></i>' : (tipo === 'error' ? '<i class="fas fa-exclamation-circle"></i>' : '<i class="fas fa-info-circle"></i>');
+            toast.innerHTML = `${icono}<span class="toast-message">${mensaje}</span>`;
             toastContainer.appendChild(toast);
-            
-            // Autoeliminar después de 3 segundos
             setTimeout(() => {
                 toast.classList.add('toast-hide');
-                setTimeout(() => {
-                    if (toast.parentNode) toast.parentNode.removeChild(toast);
-                }, 300);
+                setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
             }, 3000);
         }
 
-        // Establecer la fecha actual
         const hoy = new Date();
-        const año = hoy.getFullYear();
-        const mes = (hoy.getMonth() + 1).toString().padStart(2, '0');
-        const dia = hoy.getDate().toString().padStart(2, '0');
+        const año = hoy.getFullYear(), mes = (hoy.getMonth()+1).toString().padStart(2,'0'), dia = hoy.getDate().toString().padStart(2,'0');
         fechaInput.value = `${año}-${mes}-${dia}`;
 
-        // Pestañas
         const tabRegistroBtn = document.getElementById('tabRegistroBtn');
         const tabHistorialBtn = document.getElementById('tabHistorialBtn');
         const tabMatrizBtn = document.getElementById('tabMatrizBtn');
@@ -1059,64 +826,41 @@
         const tabHistorial = document.getElementById('tabHistorial');
         const tabMatriz = document.getElementById('tabMatriz');
 
-        // Establecer fechas por defecto en los filtros de matriz
-        const hace7Dias = new Date(hoy);
-        hace7Dias.setDate(hoy.getDate() - 10);
-        const añoDesde = hace7Dias.getFullYear();
-        const mesDesde = (hace7Dias.getMonth() + 1).toString().padStart(2, '0');
-        const diaDesde = hace7Dias.getDate().toString().padStart(2, '0');
-        fechaDesdeMatriz.value = `${añoDesde}-${mesDesde}-${diaDesde}`;
+        const hace7Dias = new Date(hoy); hace7Dias.setDate(hoy.getDate()-10);
+        fechaDesdeMatriz.value = `${hace7Dias.getFullYear()}-${(hace7Dias.getMonth()+1).toString().padStart(2,'0')}-${hace7Dias.getDate().toString().padStart(2,'0')}`;
         fechaHastaMatriz.value = `${año}-${mes}-${dia}`;
 
-        // Elementos de historial
         const historialBody = document.getElementById('historialBody');
-
-        // Calculadora
         const calcDisplay = document.getElementById('calcDisplay');
         let currentValue = '0';
-
-        // Inventario completo (para matriz)
         let inventario = [];
         let codigoCounter = 1;
-
-        // Historial (últimos 20 registros)
         let historial = [];
 
-        const calidadAbrMap = {
-            'Exportacion': 'E',
-            'Clase b': 'B',
-            'nacional': 'N',
-            'otro': 'O'
-        };
+        const calidadAbrMap = { 'Exportacion':'E', 'Clase b':'B', 'nacional':'N', 'otro':'O' };
+        function getAbreviaturaCalidad(calidad) { return calidadAbrMap[calidad] || calidad.substring(0,1).toUpperCase(); }
 
-        function getAbreviaturaCalidad(calidad) {
-            return calidadAbrMap[calidad] || calidad.substring(0, 1).toUpperCase();
-        }
-
-        // --- FUNCIÓN DE CÓDIGO ---
         function generarCodigoRamo() {
             const ahora = new Date();
             const año = ahora.getFullYear().toString().slice(-2);
-            const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
-            const dia = ahora.getDate().toString().padStart(2, '0');
+            const mes = (ahora.getMonth()+1).toString().padStart(2,'0');
+            const dia = ahora.getDate().toString().padStart(2,'0');
             const fecha = `${año}${mes}${dia}`;
             const secuencia = codigoCounter;
-            const secuenciaStr = secuencia.toString().padStart(8, '0');
+            const secuenciaStr = secuencia.toString().padStart(8,'0');
             codigoCounter++;
             return fecha + secuenciaStr;
         }
-
         function generarCodigoTemporal() {
             const ahora = new Date();
             const año = ahora.getFullYear().toString().slice(-2);
-            const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
-            const dia = ahora.getDate().toString().padStart(2, '0');
+            const mes = (ahora.getMonth()+1).toString().padStart(2,'0');
+            const dia = ahora.getDate().toString().padStart(2,'0');
             const fecha = `${año}${mes}${dia}`;
-            const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+            const random = Math.floor(Math.random()*100000000).toString().padStart(8,'0');
             return fecha + random;
         }
 
-        // --- FUNCIONES DE COMUNICACIÓN CON LA API ---
         async function cargarRamosDesdeAPI() {
             try {
                 const response = await fetch(API_URL);
@@ -1124,301 +868,112 @@
                 if (result.success) {
                     inventario = result.data;
                     if (inventario.length > 0) {
-                        const maxSec = inventario.reduce((max, item) => {
-                            const sec = parseInt(item.codigo.slice(-8)) || 0;
-                            return sec > max ? sec : max;
-                        }, 0);
+                        const maxSec = inventario.reduce((max,item) => Math.max(max, parseInt(item.codigo.slice(-8)) || 0),0);
                         codigoCounter = maxSec + 1;
-                    } else {
-                        codigoCounter = 1;
-                    }
-                    historial = inventario.slice(0, 20).map(r => ({
-                        fecha: r.fecha,
-                        variedad: r.variedad,
-                        longitud: r.longitud,
-                        tallos: r.tallos,
-                        empaque: r.empaque,
-                        calidad: r.calidadAbr,
-                        ptoCorte: r.ptoCorte,
-                        codigo: r.codigo,
-                        id: r.id
-                    }));
+                    } else codigoCounter = 1;
+                    historial = inventario.slice(0,20).map(r => ({ fecha: r.fecha, variedad: r.variedad, longitud: r.longitud, tallos: r.tallos, empaque: r.empaque, calidad: r.calidadAbr, ptoCorte: r.ptoCorte, codigo: r.codigo, id: r.id }));
                     actualizarHistorial();
                     actualizarEstadisticasMatriz();
                     if (tabMatriz.classList.contains('active')) renderizarMatriz();
-                } else {
-                    console.error('Error al cargar datos:', result.error);
-                    mostrarToast('Error al cargar datos del servidor', 'error');
-                }
-            } catch (error) {
-                console.error('Error de conexión:', error);
-                mostrarToast('Error de conexión con el servidor', 'error');
-            }
+                } else mostrarToast('Error al cargar datos del servidor', 'error');
+            } catch (error) { mostrarToast('Error de conexión con el servidor', 'error'); }
         }
 
         async function agregarRegistros(cantidad, imprimir = false, tipo = '') {
             const datosBase = obtenerDatosFormulario();
             const calidadAbr = getAbreviaturaCalidad(datosBase.calidad);
             const nuevosRegistros = [];
-
-            for (let i = 0; i < cantidad; i++) {
+            for (let i=0; i<cantidad; i++) {
                 const codigo = generarCodigoRamo();
-                nuevosRegistros.push({
-                    codigo: codigo,
-                    fecha: datosBase.fecha,
-                    proveedor: datosBase.proveedor,
-                    calidad: datosBase.calidad,
-                    calidadAbr: calidadAbr,
-                    variedad: datosBase.variedad,
-                    empaque: datosBase.empaque,
-                    ptoCorte: datosBase.ptoCorte,
-                    longitud: parseInt(datosBase.longitud),
-                    tallos: parseInt(datosBase.tallos)
-                });
+                nuevosRegistros.push({ codigo, fecha: datosBase.fecha, proveedor: datosBase.proveedor, calidad: datosBase.calidad, calidadAbr, variedad: datosBase.variedad, empaque: datosBase.empaque, ptoCorte: datosBase.ptoCorte, longitud: parseInt(datosBase.longitud), tallos: parseInt(datosBase.tallos) });
             }
-
             try {
-                const response = await fetch(`${API_URL}/batch`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(nuevosRegistros)
-                });
+                const response = await fetch(`${API_URL}/batch`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(nuevosRegistros) });
                 const result = await response.json();
-
                 if (result.success) {
                     await cargarRamosDesdeAPI();
                     const ahora = new Date();
-                    ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
-                    
+                    ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2,'0')}:${ahora.getMinutes().toString().padStart(2,'0')}`;
                     mostrarToast(`${cantidad} etiqueta(s) registrada(s) correctamente`, 'success');
-                    
-                    if (imprimir) {
-                        generarPDFeImprimir(nuevosRegistros, tipo);
-                        mostrarToast(`Enviando ${cantidad} etiqueta(s) a impresión...`, 'info');
-                    }
-                } else {
-                    mostrarToast('Error al guardar: ' + result.error, 'error');
-                }
-            } catch (error) {
-                console.error('Error en agregarRegistros:', error);
-                mostrarToast('Error de conexión con el servidor', 'error');
-            }
+                    if (imprimir) { generarPDFeImprimir(nuevosRegistros, tipo); mostrarToast(`Enviando ${cantidad} etiqueta(s) a impresión...`, 'info'); }
+                } else mostrarToast('Error al guardar: '+result.error, 'error');
+            } catch (error) { mostrarToast('Error de conexión con el servidor', 'error'); }
         }
 
         async function eliminarRegistro(codigo, id) {
             if (confirm('¿Eliminar este registro?')) {
                 try {
-                    const response = await fetch(`${API_URL}/${id}`, {
-                        method: 'DELETE'
-                    });
+                    const response = await fetch(`${API_URL}/${id}`, { method:'DELETE' });
                     const result = await response.json();
-                    if (result.success) {
-                        await cargarRamosDesdeAPI();
-                        mostrarToast(`Registro ${codigo} eliminado`, 'success');
-                    } else {
-                        mostrarToast('Error al eliminar: ' + result.error, 'error');
-                    }
-                } catch (error) {
-                    console.error('Error en eliminarRegistro:', error);
-                    mostrarToast('Error de conexión con el servidor', 'error');
-                }
+                    if (result.success) { await cargarRamosDesdeAPI(); mostrarToast(`Registro ${codigo} eliminado`, 'success'); }
+                    else mostrarToast('Error al eliminar: '+result.error, 'error');
+                } catch (error) { mostrarToast('Error de conexión con el servidor', 'error'); }
             }
         }
 
-        // Actualizar display
-        function updateDisplay() {
-            calcDisplay.innerText = currentValue === '' ? '0' : currentValue;
-        }
-
-        // Botones numéricos
-        document.querySelectorAll('.key-btn[data-num]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const num = btn.getAttribute('data-num');
-                if (currentValue === '0' || currentValue === '') currentValue = num;
-                else currentValue += num;
-                if (currentValue.length > 5) currentValue = currentValue.slice(0, 5);
-                updateDisplay();
-            });
-        });
-
-        backspaceButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentValue.length > 1) currentValue = currentValue.slice(0, -1);
-            else currentValue = '0';
-            updateDisplay();
-        });
-
-        document.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const preset = btn.getAttribute('data-preset');
-                if (preset) { currentValue = preset; updateDisplay(); }
-            });
-        });
+        function updateDisplay() { calcDisplay.innerText = currentValue === '' ? '0' : currentValue; }
+        document.querySelectorAll('.key-btn[data-num]').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); const num = btn.getAttribute('data-num'); if (currentValue === '0' || currentValue === '') currentValue = num; else currentValue += num; if (currentValue.length > 5) currentValue = currentValue.slice(0,5); updateDisplay(); }));
+        backspaceButton.addEventListener('click', e => { e.preventDefault(); if (currentValue.length > 1) currentValue = currentValue.slice(0,-1); else currentValue = '0'; updateDisplay(); });
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); const preset = btn.getAttribute('data-preset'); if (preset) { currentValue = preset; updateDisplay(); } }));
 
         function obtenerDatosFormulario() {
-            return {
-                fecha: fechaInput.value,
-                proveedor: proveedorSelect.value,
-                calidad: calidadSelect.value,
-                variedad: variedadSelect.value,
-                empaque: empaqueSelect.value,
-                ptoCorte: ptoCorteSelect.value,
-                longitud: longitudSelect.value,
-                tallos: tallosSelect.value
-            };
+            return { fecha: fechaInput.value, proveedor: proveedorSelect.value, calidad: calidadSelect.value, variedad: variedadSelect.value, empaque: empaqueSelect.value, ptoCorte: ptoCorteSelect.value, longitud: longitudSelect.value, tallos: tallosSelect.value };
         }
 
-        // --- FUNCIÓN PARA GENERAR PDF E IMPRIMIR DIRECTAMENTE (SIN MOSTRAR EL PDF) ---
         function generarPDFeImprimir(registros, tipo) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'landscape',
-                unit: 'mm',
-                format: [25, 58]
-            });
-
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [25,58] });
             registros.forEach((registro, index) => {
-                if (index > 0) doc.addPage([25, 58]);
-
-                doc.setFontSize(5);
-                doc.setFont('helvetica', 'bold');
-                doc.text(tipo, 50, 3);
-
-                doc.setFontSize(4);
-                doc.setFont('helvetica', 'normal');
-                doc.text('PRODUCT GROWN IN ECUADOR', 16, 3);
-                doc.text('ZC ROSES', 2, 22);
-                doc.text('THE BEST FLOWER FOR YOU', 2, 24);
-
-                doc.setFont('helvetica', 'bold');
-                let variedad = registro.variedad;
-                let fontSizeVariedad = 14;
-                const maxAnchoVariedad = 40;
+                if (index>0) doc.addPage([25,58]);
+                doc.setFontSize(5); doc.setFont('helvetica','bold'); doc.text(tipo,50,3);
+                doc.setFontSize(4); doc.setFont('helvetica','normal'); doc.text('PRODUCT GROWN IN ECUADOR',16,3); doc.text('ZC ROSES',2,22); doc.text('THE BEST FLOWER FOR YOU',2,24);
+                doc.setFont('helvetica','bold');
+                let variedad = registro.variedad, fontSizeVariedad = 14, maxAnchoVariedad = 40;
                 doc.setFontSize(fontSizeVariedad);
                 let anchoVariedad = doc.getTextWidth(variedad);
-                while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
-                    fontSizeVariedad -= 1;
-                    doc.setFontSize(fontSizeVariedad);
-                    anchoVariedad = doc.getTextWidth(variedad);
-                }
-                doc.text(variedad, 29, 9, { align: 'center' });
-
-                doc.setFontSize(14);
-                const tallosTexto = `${registro.longitud}/${registro.tallos}`;
-                doc.text(tallosTexto, 3, 16);
-
-                const proveedor = registro.proveedor || 'ZC ROSES';
-                const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
-                const calidadAbr = registro.calidadAbr || 'E';
-                doc.setFontSize(6);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`${iniciales} |  ${calidadAbr}`, 16, 22);
-
+                while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) { fontSizeVariedad--; doc.setFontSize(fontSizeVariedad); anchoVariedad = doc.getTextWidth(variedad); }
+                doc.text(variedad,29,9,{align:'center'});
+                doc.setFontSize(14); doc.text(`${registro.longitud}/${registro.tallos}`,3,16);
+                const proveedor = registro.proveedor || 'ZC ROSES', iniciales = proveedor.split(' ').map(p=>p.charAt(0)).join(''), calidadAbr = registro.calidadAbr || 'E';
+                doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.text(`${iniciales} |  ${calidadAbr}`,16,22);
                 const canvas = document.createElement('canvas');
-                JsBarcode(canvas, registro.codigo, {
-                    format: "CODE128",
-                    width: 2,
-                    height: 2,
-                    displayValue: false,
-                    margin: 0
-                });
+                JsBarcode(canvas, registro.codigo, { format:"CODE128", width:2, height:2, displayValue:false, margin:0 });
                 const imgData = canvas.toDataURL('image/png');
-                const imgAncho = 35;
-                const imgX = (68 - imgAncho) / 2;
-                doc.addImage(imgData, 'PNG', imgX, 12, imgAncho, 8);
-
-                doc.setFontSize(5);
-                const codigoTexto = registro.codigo;
-                const anchoCodigo = doc.getTextWidth(codigoTexto);
-                const codigoX = (80 - anchoCodigo) / 2;
-                doc.text(codigoTexto, codigoX, 22);
+                doc.addImage(imgData,'PNG',(68-35)/2,12,35,8);
+                doc.setFontSize(5); const codigoTexto = registro.codigo, anchoCodigo = doc.getTextWidth(codigoTexto);
+                doc.text(codigoTexto, (80-anchoCodigo)/2,22);
             });
-
-            // Convertir PDF a Blob y usar un iframe oculto para imprimir directamente
-            const pdfBlob = doc.output('blob');
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-
+            const pdfBlob = doc.output('blob'), pdfUrl = URL.createObjectURL(pdfBlob);
             const iframe = document.createElement('iframe');
-            iframe.style.position = 'absolute';
-            iframe.style.top = '-9999px';
-            iframe.style.left = '-9999px';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = 'none';
+            iframe.style.position = 'absolute'; iframe.style.top = '-9999px'; iframe.style.left = '-9999px'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = 'none';
             document.body.appendChild(iframe);
-
-            iframe.onload = function() {
-                try {
-                    this.contentWindow.focus();
-                    this.contentWindow.print();
-                } catch (error) {
-                    console.error('Error al imprimir:', error);
-                    mostrarToast('Error al iniciar la impresión', 'error');
-                } finally {
-                    setTimeout(() => {
-                        document.body.removeChild(iframe);
-                        URL.revokeObjectURL(pdfUrl);
-                    }, 1000);
-                }
-            };
-
+            iframe.onload = function() { try { this.contentWindow.focus(); this.contentWindow.print(); } catch(e){ mostrarToast('Error al iniciar la impresión','error'); } finally { setTimeout(()=>{ document.body.removeChild(iframe); URL.revokeObjectURL(pdfUrl); },1000); } };
             iframe.src = pdfUrl;
         }
 
-        function actualizarHistorial() {
-            if (historial.length === 0) {
-                historialBody.innerHTML = '<tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>';
-                return;
-            }
-            let html = '';
-            historial.forEach(item => {
-                const fechaLimpia = limpiarFecha(item.fecha);
-                const partes = fechaLimpia.split('-');
-                const fechaFormateada = partes.length === 3 ? `${partes[1]}/${partes[2]}/${partes[0]}` : fechaLimpia;
-                html += `<tr>
-                            <td>${fechaFormateada}</td>
-                            <td>${item.variedad}</td>
-                            <td>${item.longitud}</td>
-                            <td>${item.tallos}</td>
-                            <td>${item.empaque}</td>
-                            <td>${item.calidad}</td>
-                            <td>${item.ptoCorte}</td>
-                            <td>${item.codigo}</td>
-                            <td><i class="fas fa-trash-alt delete-btn" onclick="eliminarRegistro('${item.codigo}', ${item.id})"></i></td>
-                        </tr>`;
-            });
-            historialBody.innerHTML = html;
-        }
-
-        function actualizarEstadisticasMatriz() {
-            totalRegistrosMatriz.innerText = inventario.length;
-            totalVariedadesMatriz.innerText = new Set(inventario.map(i => i.variedad)).size;
-            totalTallosMatriz.innerText = inventario.reduce((acc, i) => acc + i.tallos, 0);
-        }
-
-        function limpiarFecha(fechaStr) {
-            if (!fechaStr) return '';
-            return fechaStr.split('T')[0];
-        }
-
-        function renderizarMatriz() {
-            const desde = fechaDesdeMatriz.value;
-            const hasta = fechaHastaMatriz.value;
-            const calidadFiltro = filterCalidadMatriz.value;
-            const busqueda = searchInputMatriz.value.toLowerCase();
-
-            const filtrados = inventario.filter(i => {
+        function obtenerRegistrosFiltrados() {
+            const desde = fechaDesdeMatriz.value, hasta = fechaHastaMatriz.value, calidadFiltro = filterCalidadMatriz.value, busqueda = searchInputMatriz.value.toLowerCase();
+            return inventario.filter(i => {
                 const fechaItem = limpiarFecha(i.fecha);
                 if (desde && fechaItem < desde) return false;
                 if (hasta && fechaItem > hasta) return false;
                 if (calidadFiltro && i.calidadAbr !== calidadFiltro) return false;
+                if (busqueda && !i.variedad.toLowerCase().includes(busqueda)) return false;
                 return true;
             });
+        }
 
-            const fechas = [...new Set(filtrados.map(i => limpiarFecha(i.fecha)))].sort();
+        function actualizarEstadisticasMatriz() {
+            totalRegistrosMatriz.innerText = inventario.length;
+            totalVariedadesMatriz.innerText = new Set(inventario.map(i=>i.variedad)).size;
+            totalTallosMatriz.innerText = inventario.reduce((acc,i)=>acc+i.tallos,0);
+        }
 
+        function limpiarFecha(fechaStr) { return fechaStr ? fechaStr.split('T')[0] : ''; }
+
+        function renderizarMatriz() {
+            const filtrados = obtenerRegistrosFiltrados();
+            const fechas = [...new Set(filtrados.map(i=>limpiarFecha(i.fecha)))].sort();
             const grupos = {};
             filtrados.forEach(i => {
                 const fechaLimpia = limpiarFecha(i.fecha);
@@ -1427,145 +982,90 @@
                 if (!grupos[key].fechas[fechaLimpia]) grupos[key].fechas[fechaLimpia] = 0;
                 grupos[key].fechas[fechaLimpia]++;
             });
-
-            const gruposArray = Object.values(grupos).filter(g => g.variedad.toLowerCase().includes(busqueda));
-            gruposArray.sort((a, b) => a.variedad.localeCompare(b.variedad) || parseInt(a.longitud) - parseInt(b.longitud));
+            const gruposArray = Object.values(grupos);
+            gruposArray.sort((a,b)=>a.variedad.localeCompare(b.variedad) || parseInt(a.longitud)-parseInt(b.longitud));
 
             let thead = '<tr><th>Variedades</th><th>Emp</th><th>Cal</th><th>Pto</th>';
-            fechas.forEach(f => {
-                const partes = f.split('-');
-                if (partes.length === 3) {
-                    thead += `<th>${partes[1]}/${partes[2]}</th>`;
-                } else {
-                    thead += `<th>${f}</th>`;
-                }
-            });
-            thead += '<th>Total</th></tr>';
+            fechas.forEach(f => { const partes = f.split('-'); thead += `<th>${partes.length===3 ? partes[1]+'/'+partes[2] : f}</th>`; });
+            thead += '<th>Total</th>;</thead>';
             matrizThead.innerHTML = thead;
-
-            if (!gruposArray.length) {
-                matrizTbody.innerHTML = '<tr class="empty-row"><td colspan="' + (4 + fechas.length + 1) + '">Sin datos</td></tr>';
-                return;
-            }
+            if (!gruposArray.length) { matrizTbody.innerHTML = '<tr class="empty-row"><td colspan="'+(4+fechas.length+1)+'">Sin datos</td></tr>'; return; }
 
             let tbody = '', totales = {}, totalGlobal = 0;
-            fechas.forEach(f => totales[f] = 0);
+            fechas.forEach(f=>totales[f]=0);
             gruposArray.forEach(g => {
                 let row = `<tr><td>${g.variedad} ${g.longitud} ${g.tallos} ${g.calidadAbr}</td><td>${g.empaque}</td><td>${g.calidadAbr}</td><td>${g.ptoCorte}</td>`;
                 let suma = 0;
-                fechas.forEach(f => {
-                    const cnt = g.fechas[f] || 0;
-                    row += `<td>${cnt || ''}</td>`;
-                    suma += cnt;
-                    totales[f] += cnt;
-                });
+                fechas.forEach(f => { const cnt = g.fechas[f] || 0; row += `<td>${cnt||''}</td>`; suma += cnt; totales[f] += cnt; });
                 row += `<td>${suma}</td></tr>`;
                 tbody += row;
                 totalGlobal += suma;
             });
-
             let totalRow = '<tr class="total-row"><td colspan="4">Totales:</td>';
             fechas.forEach(f => totalRow += `<td><strong>${totales[f]}</strong></td>`);
             totalRow += `<td><strong>${totalGlobal}</strong></td></tr>`;
             matrizTbody.innerHTML = tbody + totalRow;
         }
 
-        function resetearContador() { currentValue = '0'; updateDisplay(); }
-
-        function registrarEtiquetas() {
-            let cant = parseInt(currentValue, 10);
-            if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0', 'error'); return; }
-            agregarRegistros(cant, false, '');
-            resetearContador();
-        }
-
-        function imprimirEtiquetas() {
-            let cant = parseInt(currentValue, 10);
-            if (!cant || isNaN(cant)) {
-                mostrarToast('La cantidad no puede ser 0', 'error');
+        // Exportar a XLSX con columnas separadas
+        function exportarExcel() {
+            const registrosFiltrados = obtenerRegistrosFiltrados();
+            if (!registrosFiltrados.length) {
+                mostrarToast('No hay datos para exportar', 'info');
                 return;
             }
-            const datosBase = obtenerDatosFormulario();
-            const calidadAbr = getAbreviaturaCalidad(datosBase.calidad);
-            const registrosParaImprimir = [];
-
-            for (let i = 0; i < cant; i++) {
-                const codigo = generarCodigoTemporal();
-                registrosParaImprimir.push({
-                    codigo: codigo,
-                    fecha: datosBase.fecha,
-                    proveedor: datosBase.proveedor,
-                    calidad: datosBase.calidad,
-                    calidadAbr: calidadAbr,
-                    variedad: datosBase.variedad,
-                    empaque: datosBase.empaque,
-                    ptoCorte: datosBase.ptoCorte,
-                    longitud: parseInt(datosBase.longitud),
-                    tallos: parseInt(datosBase.tallos)
-                });
-            }
-            generarPDFeImprimir(registrosParaImprimir, 'IMP');
-            mostrarToast(`Enviando ${cant} etiqueta(s) a impresión (solo vista previa)`, 'info');
-            resetearContador();
+            // Preparar datos para SheetJS: cada registro es un objeto con las columnas
+            const data = registrosFiltrados.map(reg => ({
+                Fecha: limpiarFecha(reg.fecha),
+                Variedad: reg.variedad,
+                Longitud: reg.longitud,
+                Tallos: reg.tallos,
+                Empaque: reg.empaque,
+                Calidad: reg.calidadAbr,
+                "Pto Corte": reg.ptoCorte,
+                Código: reg.codigo
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+            XLSX.writeFile(wb, `inventario_rosas_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+            mostrarToast('Exportación completada', 'success');
         }
 
-        btnRegistrar.addEventListener('click', e => { e.preventDefault(); registrarEtiquetas(); });
-        btnImprimir.addEventListener('click', e => { e.preventDefault(); imprimirEtiquetas(); });
-        irButton.addEventListener('click', e => {
-            e.preventDefault();
-            let cant = parseInt(currentValue, 10);
-            if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0', 'error'); return; }
-            agregarRegistros(cant, true, 'IR');
-            resetearContador();
-        });
+        btnExportExcel.addEventListener('click', exportarExcel);
 
-        btnClearInventoryMatriz.addEventListener('click', e => {
-            e.preventDefault();
-            if (confirm('¿Limpiar todo el inventario? Esta acción solo limpia la vista local, no la base de datos.')) {
-                inventario = [];
-                codigoCounter = 1;
-                historial = [];
-                actualizarEstadisticasMatriz();
-                renderizarMatriz();
-                actualizarHistorial();
-                ultimoRegistroSpan.innerText = '--:--';
-                mostrarToast('Inventario local limpiado', 'info');
-            }
-        });
+        function actualizarHistorial() {
+            if (!historial.length) { historialBody.innerHTML = '<tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>'; return; }
+            let html = '';
+            historial.forEach(item => {
+                const fechaLimpia = limpiarFecha(item.fecha);
+                const partes = fechaLimpia.split('-');
+                const fechaFormateada = partes.length===3 ? `${partes[1]}/${partes[2]}/${partes[0]}` : fechaLimpia;
+                html += `<tr><td>${fechaFormateada}</td><td>${item.variedad}</td><td>${item.longitud}</td><td>${item.tallos}</td><td>${item.empaque}</td><td>${item.calidad}</td><td>${item.ptoCorte}</td><td>${item.codigo}</td><td><i class="fas fa-trash-alt delete-btn" onclick="eliminarRegistro('${item.codigo}', ${item.id})"></i></td></tr>`;
+            });
+            historialBody.innerHTML = html;
+        }
 
+        function resetearContador() { currentValue = '0'; updateDisplay(); }
+        function registrarEtiquetas() { let cant = parseInt(currentValue,10); if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0','error'); return; } agregarRegistros(cant,false,''); resetearContador(); }
+        function imprimirEtiquetas() { let cant = parseInt(currentValue,10); if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0','error'); return; } const datosBase = obtenerDatosFormulario(); const calidadAbr = getAbreviaturaCalidad(datosBase.calidad); const registrosParaImprimir = []; for (let i=0;i<cant;i++) { const codigo = generarCodigoTemporal(); registrosParaImprimir.push({ codigo, fecha:datosBase.fecha, proveedor:datosBase.proveedor, calidad:datosBase.calidad, calidadAbr, variedad:datosBase.variedad, empaque:datosBase.empaque, ptoCorte:datosBase.ptoCorte, longitud:parseInt(datosBase.longitud), tallos:parseInt(datosBase.tallos) }); } generarPDFeImprimir(registrosParaImprimir,'IMP'); mostrarToast(`Enviando ${cant} etiqueta(s) a impresión (solo vista previa)`,'info'); resetearContador(); }
+
+        btnRegistrar.addEventListener('click', e=>{ e.preventDefault(); registrarEtiquetas(); });
+        btnImprimir.addEventListener('click', e=>{ e.preventDefault(); imprimirEtiquetas(); });
+        irButton.addEventListener('click', e=>{ e.preventDefault(); let cant = parseInt(currentValue,10); if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0','error'); return; } agregarRegistros(cant,true,'IR'); resetearContador(); });
         fechaDesdeMatriz.addEventListener('change', renderizarMatriz);
         fechaHastaMatriz.addEventListener('change', renderizarMatriz);
         filterCalidadMatriz.addEventListener('change', renderizarMatriz);
         searchInputMatriz.addEventListener('input', renderizarMatriz);
-
-        tabRegistroBtn.addEventListener('click', () => {
-            tabRegistroBtn.classList.add('active'); tabHistorialBtn.classList.remove('active'); tabMatrizBtn.classList.remove('active');
-            tabRegistro.classList.add('active'); tabHistorial.classList.remove('active'); tabMatriz.classList.remove('active');
-        });
-        tabHistorialBtn.addEventListener('click', () => {
-            tabHistorialBtn.classList.add('active'); tabRegistroBtn.classList.remove('active'); tabMatrizBtn.classList.remove('active');
-            tabHistorial.classList.add('active'); tabRegistro.classList.remove('active'); tabMatriz.classList.remove('active');
-            actualizarHistorial();
-        });
-        tabMatrizBtn.addEventListener('click', () => {
-            tabMatrizBtn.classList.add('active'); tabRegistroBtn.classList.remove('active'); tabHistorialBtn.classList.remove('active');
-            tabMatriz.classList.add('active'); tabRegistro.classList.remove('active'); tabHistorial.classList.remove('active');
-            renderizarMatriz(); actualizarEstadisticasMatriz();
-        });
-
-        function actualizarLote() {
-            loteSpan.innerText = `${ptoCorteSelect.value}-${longitudSelect.value}-${variedadSelect.value.substring(0, 2).toUpperCase()}`;
-        }
-        ptoCorteSelect.addEventListener('change', actualizarLote);
-        longitudSelect.addEventListener('change', actualizarLote);
-        variedadSelect.addEventListener('change', actualizarLote);
+        tabRegistroBtn.addEventListener('click',()=>{ tabRegistroBtn.classList.add('active'); tabHistorialBtn.classList.remove('active'); tabMatrizBtn.classList.remove('active'); tabRegistro.classList.add('active'); tabHistorial.classList.remove('active'); tabMatriz.classList.remove('active'); });
+        tabHistorialBtn.addEventListener('click',()=>{ tabHistorialBtn.classList.add('active'); tabRegistroBtn.classList.remove('active'); tabMatrizBtn.classList.remove('active'); tabHistorial.classList.add('active'); tabRegistro.classList.remove('active'); tabMatriz.classList.remove('active'); actualizarHistorial(); });
+        tabMatrizBtn.addEventListener('click',()=>{ tabMatrizBtn.classList.add('active'); tabRegistroBtn.classList.remove('active'); tabHistorialBtn.classList.remove('active'); tabMatriz.classList.add('active'); tabRegistro.classList.remove('active'); tabHistorial.classList.remove('active'); renderizarMatriz(); actualizarEstadisticasMatriz(); });
+        function actualizarLote() { loteSpan.innerText = `${ptoCorteSelect.value}-${longitudSelect.value}-${variedadSelect.value.substring(0,2).toUpperCase()}`; }
+        ptoCorteSelect.addEventListener('change', actualizarLote); longitudSelect.addEventListener('change', actualizarLote); variedadSelect.addEventListener('change', actualizarLote);
         actualizarLote();
 
-        // Inicializar
         cargarRamosDesdeAPI();
         updateDisplay();
-
-        // Hacer accesible la función eliminarRegistro globalmente
         window.eliminarRegistro = eliminarRegistro;
     })();
 </script>
