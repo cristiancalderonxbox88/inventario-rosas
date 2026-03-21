@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* ===== ESTILOS MEJORADOS (mantienen toda la funcionalidad) ===== */
+        /* ===== ESTILOS MEJORADOS ===== */
         * {
             margin: 0;
             padding: 0;
@@ -589,6 +589,80 @@
             color: #1e4a2e;
         }
 
+        /* ===== ESTILOS PARA TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1e2f3a;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 260px;
+            max-width: 350px;
+            pointer-events: auto;
+            animation: slideIn 0.3s ease-out;
+            backdrop-filter: blur(4px);
+            border-left: 5px solid;
+        }
+
+        .toast-success {
+            background: #1e6a3e;
+            border-left-color: #a5d6a5;
+        }
+        .toast-error {
+            background: #b91c1c;
+            border-left-color: #ffb3b3;
+        }
+        .toast-info {
+            background: #2c5f8a;
+            border-left-color: #8fc9ff;
+        }
+
+        .toast i {
+            font-size: 1.2rem;
+        }
+
+        .toast .toast-message {
+            flex: 1;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .toast-hide {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .form-grid {
@@ -604,6 +678,14 @@
                 width: 60px;
                 height: 60px;
                 font-size: 1.4rem;
+            }
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+            .toast {
+                max-width: calc(100% - 20px);
             }
         }
 
@@ -896,6 +978,9 @@
     </div>
 </div>
 
+<!-- Contenedor para notificaciones toast -->
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
     (function() {
         
@@ -918,7 +1003,48 @@
         const irButton = document.getElementById('irButton');
         const backspaceButton = document.getElementById('backspaceButton');
 
-        // Establecer la fecha actual en el campo de fecha al cargar la página
+        // Elementos de matriz
+        const fechaDesdeMatriz = document.getElementById('fechaDesdeMatriz');
+        const fechaHastaMatriz = document.getElementById('fechaHastaMatriz');
+        const filterCalidadMatriz = document.getElementById('filterCalidadMatriz');
+        const searchInputMatriz = document.getElementById('searchInputMatriz');
+        const matrizThead = document.getElementById('matrizThead');
+        const matrizTbody = document.getElementById('matrizTbody');
+        const totalRegistrosMatriz = document.getElementById('totalRegistrosMatriz');
+        const totalVariedadesMatriz = document.getElementById('totalVariedadesMatriz');
+        const totalTallosMatriz = document.getElementById('totalTallosMatriz');
+        const btnClearInventoryMatriz = document.getElementById('btnClearInventoryMatriz');
+
+        // Contenedor de toasts
+        const toastContainer = document.getElementById('toastContainer');
+
+        // --- FUNCIÓN PARA MOSTRAR TOAST ---
+        function mostrarToast(mensaje, tipo = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${tipo}`;
+            
+            let icono = '';
+            if (tipo === 'success') icono = '<i class="fas fa-check-circle"></i>';
+            else if (tipo === 'error') icono = '<i class="fas fa-exclamation-circle"></i>';
+            else icono = '<i class="fas fa-info-circle"></i>';
+            
+            toast.innerHTML = `
+                ${icono}
+                <span class="toast-message">${mensaje}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Autoeliminar después de 3 segundos
+            setTimeout(() => {
+                toast.classList.add('toast-hide');
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Establecer la fecha actual
         const hoy = new Date();
         const año = hoy.getFullYear();
         const mes = (hoy.getMonth() + 1).toString().padStart(2, '0');
@@ -933,19 +1059,7 @@
         const tabHistorial = document.getElementById('tabHistorial');
         const tabMatriz = document.getElementById('tabMatriz');
 
-        // Elementos de matriz
-        const fechaDesdeMatriz = document.getElementById('fechaDesdeMatriz');
-        const fechaHastaMatriz = document.getElementById('fechaHastaMatriz');
-        const filterCalidadMatriz = document.getElementById('filterCalidadMatriz');
-        const searchInputMatriz = document.getElementById('searchInputMatriz');
-        const matrizThead = document.getElementById('matrizThead');
-        const matrizTbody = document.getElementById('matrizTbody');
-        const totalRegistrosMatriz = document.getElementById('totalRegistrosMatriz');
-        const totalVariedadesMatriz = document.getElementById('totalVariedadesMatriz');
-        const totalTallosMatriz = document.getElementById('totalTallosMatriz');
-        const btnClearInventoryMatriz = document.getElementById('btnClearInventoryMatriz');
-
-        // Establecer fechas por defecto en los filtros de matriz (últimos 7 días)
+        // Establecer fechas por defecto en los filtros de matriz
         const hace7Dias = new Date(hoy);
         hace7Dias.setDate(hoy.getDate() - 10);
         const añoDesde = hace7Dias.getFullYear();
@@ -979,7 +1093,7 @@
             return calidadAbrMap[calidad] || calidad.substring(0, 1).toUpperCase();
         }
 
-        // --- FUNCIÓN DE CÓDIGO SIMPLIFICADA ---
+        // --- FUNCIÓN DE CÓDIGO ---
         function generarCodigoRamo() {
             const ahora = new Date();
             const año = ahora.getFullYear().toString().slice(-2);
@@ -1034,9 +1148,11 @@
                     if (tabMatriz.classList.contains('active')) renderizarMatriz();
                 } else {
                     console.error('Error al cargar datos:', result.error);
+                    mostrarToast('Error al cargar datos del servidor', 'error');
                 }
             } catch (error) {
                 console.error('Error de conexión:', error);
+                mostrarToast('Error de conexión con el servidor', 'error');
             }
         }
 
@@ -1073,15 +1189,19 @@
                     await cargarRamosDesdeAPI();
                     const ahora = new Date();
                     ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+                    
+                    mostrarToast(`${cantidad} etiqueta(s) registrada(s) correctamente`, 'success');
+                    
                     if (imprimir) {
                         generarPDFeImprimir(nuevosRegistros, tipo);
+                        mostrarToast(`Enviando ${cantidad} etiqueta(s) a impresión...`, 'info');
                     }
                 } else {
-                    alert('Error al guardar en la base de datos: ' + result.error);
+                    mostrarToast('Error al guardar: ' + result.error, 'error');
                 }
             } catch (error) {
                 console.error('Error en agregarRegistros:', error);
-                alert('Error de conexión con el servidor');
+                mostrarToast('Error de conexión con el servidor', 'error');
             }
         }
 
@@ -1094,12 +1214,13 @@
                     const result = await response.json();
                     if (result.success) {
                         await cargarRamosDesdeAPI();
+                        mostrarToast(`Registro ${codigo} eliminado`, 'success');
                     } else {
-                        alert('Error al eliminar: ' + result.error);
+                        mostrarToast('Error al eliminar: ' + result.error, 'error');
                     }
                 } catch (error) {
                     console.error('Error en eliminarRegistro:', error);
-                    alert('Error de conexión con el servidor');
+                    mostrarToast('Error de conexión con el servidor', 'error');
                 }
             }
         }
@@ -1219,7 +1340,6 @@
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);
 
-            // Crear iframe oculto
             const iframe = document.createElement('iframe');
             iframe.style.position = 'absolute';
             iframe.style.top = '-9999px';
@@ -1235,8 +1355,8 @@
                     this.contentWindow.print();
                 } catch (error) {
                     console.error('Error al imprimir:', error);
+                    mostrarToast('Error al iniciar la impresión', 'error');
                 } finally {
-                    // Limpiar el iframe y revocar la URL después de un tiempo
                     setTimeout(() => {
                         document.body.removeChild(iframe);
                         URL.revokeObjectURL(pdfUrl);
@@ -1354,16 +1474,15 @@
 
         function registrarEtiquetas() {
             let cant = parseInt(currentValue, 10);
-            if (!cant) { alert('La cantidad no puede ser 0'); return; }
+            if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0', 'error'); return; }
             agregarRegistros(cant, false, '');
             resetearContador();
-            alert(`${cant} etiqueta(s) registrada(s).`);
         }
 
         function imprimirEtiquetas() {
             let cant = parseInt(currentValue, 10);
-            if (!cant) {
-                alert('La cantidad no puede ser 0');
+            if (!cant || isNaN(cant)) {
+                mostrarToast('La cantidad no puede ser 0', 'error');
                 return;
             }
             const datosBase = obtenerDatosFormulario();
@@ -1386,6 +1505,7 @@
                 });
             }
             generarPDFeImprimir(registrosParaImprimir, 'IMP');
+            mostrarToast(`Enviando ${cant} etiqueta(s) a impresión (solo vista previa)`, 'info');
             resetearContador();
         }
 
@@ -1394,15 +1514,14 @@
         irButton.addEventListener('click', e => {
             e.preventDefault();
             let cant = parseInt(currentValue, 10);
-            if (!cant) { alert('La cantidad no puede ser 0'); return; }
+            if (!cant || isNaN(cant)) { mostrarToast('La cantidad no puede ser 0', 'error'); return; }
             agregarRegistros(cant, true, 'IR');
             resetearContador();
-            alert(`${cant} etiqueta(s) registrada(s) e impresa(s).`);
         });
 
         btnClearInventoryMatriz.addEventListener('click', e => {
             e.preventDefault();
-            if (confirm('¿Limpiar todo el inventario?')) {
+            if (confirm('¿Limpiar todo el inventario? Esta acción solo limpia la vista local, no la base de datos.')) {
                 inventario = [];
                 codigoCounter = 1;
                 historial = [];
@@ -1410,7 +1529,7 @@
                 renderizarMatriz();
                 actualizarHistorial();
                 ultimoRegistroSpan.innerText = '--:--';
-                alert('Solo se limpió la vista local. Los datos en la base de datos permanecen.');
+                mostrarToast('Inventario local limpiado', 'info');
             }
         });
 
