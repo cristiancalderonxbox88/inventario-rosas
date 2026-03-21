@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inventario de Rosas · CRISTIAN CALDERÓN</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,10 +14,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
-        /* ===== SOBRESCRITURA DE BOOTSTRAP (mantiene tu diseño original) ===== */
+        /* ===== ESTILOS MEJORADOS (mantienen toda la funcionalidad) ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: #e8f0e8 !important;
-            font-family: 'Inter', sans-serif !important;
+            background: #e8f0e8;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 16px;
+            color: #1e2f3a;
         }
 
         .app-container {
@@ -31,9 +41,9 @@
             padding: 24px 28px;
             max-height: 98vh;
             overflow-y: auto;
-            margin: 0 auto;
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -82,6 +92,11 @@
             box-shadow: 0 4px 10px rgba(30, 70, 50, 0.3);
         }
 
+        .operator-box i {
+            color: #f5e6b3;
+        }
+
+        /* Pestañas */
         .tabs {
             display: flex;
             gap: 8px;
@@ -125,13 +140,23 @@
             display: block;
         }
 
+        /* Registro: fila formulario + teclado */
+        .registro-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Formulario */
         .form-card {
             background: #f9fdf9;
             border-radius: 28px;
             border: 1px solid #d4e8d4;
             padding: 20px;
+            flex: 2;
+            min-width: 320px;
             box-shadow: 0 8px 18px -8px rgba(30, 70, 30, 0.15);
-            height: 100%;
         }
 
         .form-title {
@@ -168,22 +193,26 @@
             gap: 4px;
         }
 
-        .form-control, select.form-control {
+        .form-row label i {
+            width: 16px;
+            color: #7f9f7f;
+        }
+
+        .form-control {
             background: white;
-            border: 1px solid #c0dcc0 !important;
-            border-radius: 18px !important;
-            padding: 10px 14px !important;
-            font-size: 0.85rem !important;
+            border: 1px solid #c0dcc0;
+            border-radius: 18px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
             font-weight: 500;
             color: #1e2f3a;
             outline: none;
             transition: border 0.2s, box-shadow 0.2s;
-            box-shadow: none !important;
         }
 
         .form-control:focus {
-            border-color: #4cae6c !important;
-            box-shadow: 0 0 0 3px rgba(70, 160, 100, 0.2) !important;
+            border-color: #4cae6c;
+            box-shadow: 0 0 0 3px rgba(70, 160, 100, 0.2);
         }
 
         select.form-control {
@@ -194,16 +223,18 @@
             background-size: 14px;
         }
 
+        /* Teclado mejorado */
         .teclado-card {
             background: #f0f8f0;
             border-radius: 28px;
             border: 1px solid #c0dcc0;
             padding: 20px;
+            flex: 1;
+            min-width: 280px;
             display: flex;
             flex-direction: column;
             gap: 16px;
             box-shadow: 0 10px 20px -10px rgba(30, 70, 40, 0.2);
-            height: 100%;
         }
 
         .calculator-display {
@@ -266,6 +297,10 @@
             box-shadow: 0 5px 0 #1e4a2e, 0 8px 14px rgba(0,40,0,0.2);
         }
 
+        .key-btn.ir:hover {
+            background: #3c9c6c;
+        }
+
         .quick-presets {
             display: flex;
             gap: 8px;
@@ -286,6 +321,11 @@
             text-align: center;
             box-shadow: 0 3px 6px rgba(0,20,0,0.05);
             transition: all 0.1s;
+        }
+
+        .preset-btn:hover {
+            background: #e0f5e0;
+            border-color: #8cb08c;
         }
 
         .action-buttons {
@@ -315,12 +355,22 @@
             box-shadow: 0 8px 16px -8px #1e4a2e;
         }
 
+        .btn-primary:hover {
+            background: #3c9c6c;
+            transform: scale(1.02);
+        }
+
         .btn-secondary {
             background: white;
             border: 1px solid #b8d8b8;
             color: #1e4a2e;
         }
 
+        .btn-secondary:hover {
+            background: #f0faf0;
+        }
+
+        /* Historial y Matriz */
         .historial-card, .inventory-header {
             background: #f9fdf9;
             border-radius: 28px;
@@ -345,10 +395,8 @@
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
         }
 
-        /* Sobrescribir card de Bootstrap para que coincida con el diseño */
         .stat-card {
             background: white;
             border-radius: 20px;
@@ -358,7 +406,6 @@
             gap: 16px;
             border: 1px solid #d0e0d0;
             box-shadow: 0 4px 8px rgba(0,20,0,0.05);
-            flex: 1;
         }
 
         .stat-icon {
@@ -377,7 +424,6 @@
             font-size: 0.8rem;
             font-weight: 500;
             color: #5f7f6f;
-            margin: 0;
         }
 
         .stat-info p {
@@ -385,7 +431,6 @@
             font-weight: 700;
             color: #1e3a2e;
             line-height: 1.2;
-            margin: 0;
         }
 
         .filters {
@@ -406,6 +451,14 @@
             padding: 4px 4px 4px 16px;
         }
 
+        .filter-group input {
+            border: none;
+            padding: 10px 6px;
+            font-size: 0.9rem;
+            width: 120px;
+            outline: none;
+        }
+
         .search-box {
             flex: 1;
             min-width: 240px;
@@ -415,6 +468,14 @@
             border: 1px solid #c0dcc0;
             border-radius: 40px;
             padding: 4px 4px 4px 18px;
+        }
+
+        .search-box input {
+            border: none;
+            padding: 12px 8px;
+            font-size: 0.9rem;
+            width: 100%;
+            outline: none;
         }
 
         .filter-select {
@@ -441,6 +502,11 @@
             white-space: nowrap;
         }
 
+        .btn-clear:hover {
+            background: #ffe6e6;
+        }
+
+        /* Tablas */
         .table-container {
             overflow-x: auto;
             border-radius: 20px;
@@ -451,26 +517,44 @@
             box-shadow: 0 6px 12px rgba(0,20,0,0.05);
         }
 
-        /* Usar clases de Bootstrap para tablas, pero mantener bordes redondeados */
-        .table {
-            margin-bottom: 0;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 1100px;
         }
 
-        .table th {
+        th {
             background: #e0f0e0;
             padding: 14px 8px;
             font-weight: 600;
             color: #1e4a2e;
+            text-align: left;
             border-bottom: 2px solid #c0dcc0;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        .table td {
+        td {
             padding: 12px 8px;
             border-bottom: 1px solid #d0e0d0;
             color: #1e2f3a;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9fcf9;
+        }
+
+        tbody tr:hover {
+            background-color: #e0f5e0;
+        }
+
+        .empty-row td {
+            padding: 40px;
+            text-align: center;
+            color: #8faa8f;
+            font-style: italic;
         }
 
         .delete-btn {
@@ -479,6 +563,11 @@
             transition: color 0.1s;
         }
 
+        .delete-btn:hover {
+            color: #a14a4a;
+        }
+
+        /* Footer */
         .footer-info {
             margin-top: 24px;
             display: flex;
@@ -490,7 +579,7 @@
             color: #5f7f6f;
         }
 
-        .badge-custom {
+        .badge {
             background: #e0f0e0;
             padding: 6px 18px;
             border-radius: 30px;
@@ -500,9 +589,13 @@
             color: #1e4a2e;
         }
 
-        @media (max-width: 768px) {
+        /* Responsive */
+        @media (max-width: 900px) {
             .form-grid {
                 grid-template-columns: 1fr;
+            }
+            .registro-row {
+                flex-direction: column;
             }
             .app-container {
                 padding: 18px;
@@ -511,6 +604,16 @@
                 width: 60px;
                 height: 60px;
                 font-size: 1.4rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .stats-cards {
+                flex-direction: column;
             }
         }
     </style>
@@ -530,171 +633,170 @@
 
     <!-- Pestañas -->
     <div class="tabs">
-        <button class="tab-btn active" id="tabRegistroBtn" data-bs-toggle="tooltip" title="Registrar nuevas etiquetas"><i class="fas fa-pencil-alt"></i> Registro</button>
-        <button class="tab-btn" id="tabHistorialBtn" data-bs-toggle="tooltip" title="Ver últimos registros"><i class="fas fa-history"></i> Historial</button>
-        <button class="tab-btn" id="tabMatrizBtn" data-bs-toggle="tooltip" title="Inventario por fecha"><i class="fas fa-table"></i> Inventario Matriz</button>
+        <button class="tab-btn active" id="tabRegistroBtn"><i class="fas fa-pencil-alt"></i> Registro</button>
+        <button class="tab-btn" id="tabHistorialBtn"><i class="fas fa-history"></i> Historial</button>
+        <button class="tab-btn" id="tabMatrizBtn"><i class="fas fa-table"></i> Inventario Matriz</button>
     </div>
 
-    <!-- Contenido Registro (con sistema de grillas Bootstrap) -->
+    <!-- Contenido Registro -->
     <div class="tab-content active" id="tabRegistro">
-        <div class="row g-4">
-            <div class="col-12 col-lg-8">
-                <div class="form-card">
-                    <div class="form-title">
-                        <i class="fas fa-tag" style="color:#1e3a5f;"></i> Datos de la etiqueta
+        <div class="registro-row">
+            <!-- Formulario izquierda -->
+            <div class="form-card">
+                <div class="form-title">
+                    <i class="fas fa-tag" style="color:#1e3a5f;"></i> Datos de la etiqueta
+                </div>
+                <div class="form-grid">
+                    <div class="form-row">
+                        <label><i class="fas fa-truck"></i> Proveedor</label>
+                        <select class="form-control" id="proveedor">
+                            <option value="ZC ROSES" selected>ZC ROSES</option>
+                            <option value="ROSES FARM">ROSES FARM</option>
+                            <option value="FLOWER VALLEY">FLOWER VALLEY</option>
+                            <option value="PETALOS SA">PETALOS SA</option>
+                        </select>
                     </div>
-                    <div class="form-grid">
-                        <div class="form-row">
-                            <label><i class="fas fa-truck"></i> Proveedor</label>
-                            <select class="form-control" id="proveedor">
-                                <option value="ZC ROSES" selected>ZC ROSES</option>
-                                <option value="ROSES FARM">ROSES FARM</option>
-                                <option value="FLOWER VALLEY">FLOWER VALLEY</option>
-                                <option value="PETALOS SA">PETALOS SA</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><i class="fas fa-certificate"></i> Calidad</label>
-                            <select class="form-control" id="calidad">
-                                <option value="Exportacion" selected>Exportación</option>
-                                <option value="Clase b">Clase b</option>
-                                <option value="nacional">nacional</option>
-                                <option value="otro">otro</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><i class="fas fa-rose"></i> Variedad</label>
-                            <select class="form-control" id="variedadSelect">
-                                <option value="BE SWEET" selected>BE SWEET</option>
-                                <option value="BOULEVARD">BOULEVARD</option>
-                                <option value="BRIGHTON">BRIGHTON</option>
-                                <option value="BARISTA">BARISTA</option>
-                                <option value="CANDLELIGHT">CANDLELIGHT</option>
-                                <option value="CANDY X-PRESSION">CANDY X-PRESSION</option>
-                                <option value="CARPE DIEM">CARPE DIEM</option>
-                                <option value="COFFE BREAK">COFFE BREAK</option>
-                                <option value="COTTON XPRESSION">COTTON XPRESSION</option>
-                                <option value="COUNTRY BLUES">COUNTRY BLUES</option>
-                                <option value="DEEP PURPLE">DEEP PURPLE</option>
-                                <option value="ESPERANCE">ESPERANCE</option>
-                                <option value="EXPLORER">EXPLORER</option>
-                                <option value="FULL MONTY">FULL MONTY</option>
-                                <option value="FREE SPIRIT">FREE SPIRIT</option>
-                                <option value="FREEDOM">FREEDOM</option>
-                                <option value="FRUTTETO">FRUTTETO</option>
-                                <option value="GOTCHA">GOTCHA</option>
-                                <option value="HEARTS">HEARTS</option>
-                                <option value="HERMOSA">HERMOSA</option>
-                                <option value="HIGH MAGIC">HIGH MAGIC</option>
-                                <option value="HOT EXPLORER">HOT EXPLORER</option>
-                                <option value="JACARANDA">JACARANDA</option>
-                                <option value="KAHALA">KAHALA</option>
-                                <option value="LOLA">LOLA</option>
-                                <option value="LUCIANO">LUCIANO</option>
-                                <option value="MAGIC TIMES">MAGIC TIMES</option>
-                                <option value="MANDALA">MANDALA</option>
-                                <option value="MANDARIN XPRESSION">MANDARIN XPRESSION</option>
-                                <option value="MOONSTONE">MOONSTONE</option>
-                                <option value="MOMENTUM">MOMENTUM</option>
-                                <option value="MONDIAL">MONDIAL</option>
-                                <option value="NINA">NINA</option>
-                                <option value="NOVIA">NOVIA</option>
-                                <option value="ORANGE CRUSH">ORANGE CRUSH</option>
-                                <option value="PALOMA">PALOMA</option>
-                                <option value="PINK FLOYD">PINK FLOYD</option>
-                                <option value="PINK X-PRESSION">PINK X-PRESSION</option>
-                                <option value="PLAYA BLANCA">PLAYA BLANCA</option>
-                                <option value="PANDORA">PANDORA</option>
-                                <option value="PINK MONDIAL">PINK MONDIAL</option>
-                                <option value="PINK PUMA">PINK PUMA</option>
-                                <option value="POMAROSA">POMAROSA</option>
-                                <option value="POWDER PUFF">POWDER PUFF</option>
-                                <option value="PRINCESS CROWN">PRINCESS CROWN</option>
-                                <option value="PROUD">PROUD</option>
-                                <option value="QUICKSAND">QUICKSAND</option>
-                                <option value="RED PANTHER">RED PANTHER</option>
-                                <option value="SHIMMER">SHIMMER</option>
-                                <option value="SHOCKING BLUE">SHOCKING BLUE</option>
-                                <option value="SILANTOI">SILANTOI</option>
-                                <option value="SWEET BEAT">SWEET BEAT</option>
-                                <option value="SWEET UNIQUE">SWEET UNIQUE</option>
-                                <option value="TIBET">TIBET</option>
-                                <option value="TIFFANY">TIFFANY</option>
-                                <option value="VENDELA">VENDELA</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><i class="fas fa-box"></i> Empaque</label>
-                            <select class="form-control" id="empaque">
-                                <option value="STA CLA" selected>ZC Roses</option>
-                                <option value="BUNCH">BUNCH</option>
-                                <option value="SLEEVE">SLEEVE</option>
-                                <option value="BOX">BOX</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><i class="fas fa-cut"></i> Pto Corte</label>
-                            <select class="form-control" id="ptoCorte">
-                                <option value="RS" selected>RS</option>
-                                <option value="RC">AM</option>
-                                <option value="RB">EU</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><i class="fas fa-ruler"></i> Longitud</label>
-                            <select class="form-control" id="longitud">
-                                <option value="40">40</option><option value="50">50</option><option value="60">60</option>
-                                <option value="70">70</option><option value="80">80</option><option value="90">90</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label><i class="fas fa-leaf"></i> Tallos</label>
-                            <select class="form-control" id="tallos">
-                                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                                <option value="10">10</option><option value="11">11</option><option value="12">12</option>
-                                <option value="13">13</option><option value="14">14</option><option value="15">15</option>
-                                <option value="16">16</option><option value="17">17</option><option value="18">18</option>
-                                <option value="19">19</option><option value="20">20</option><option value="21">21</option>
-                                <option value="22">22</option><option value="23">23</option><option value="24">24</option>
-                                <option value="25" selected>25</option><option value="26">26</option><option value="27">27</option>
-                                <option value="28">28</option><option value="29">29</option><option value="30">30</option>
-                            </select>
-                        </div>
+                    <div class="form-row">
+                        <label><i class="fas fa-certificate"></i> Calidad</label>
+                        <select class="form-control" id="calidad">
+                            <option value="Exportacion" selected>Exportación</option>
+                            <option value="Clase b">Clase b</option>
+                            <option value="nacional">nacional</option>
+                            <option value="otro">otro</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label><i class="fas fa-rose"></i> Variedad</label>
+                        <select class="form-control" id="variedadSelect">
+                            <option value="BE SWEET" selected>BE SWEET</option>
+                            <option value="BOULEVARD">BOULEVARD</option>
+                            <option value="BRIGHTON">BRIGHTON</option>
+                            <option value="BARISTA">BARISTA</option>
+                            <option value="CANDLELIGHT">CANDLELIGHT</option>
+                            <option value="CANDY X-PRESSION">CANDY X-PRESSION</option>
+                            <option value="CARPE DIEM">CARPE DIEM</option>
+                            <option value="COFFE BREAK">COFFE BREAK</option>
+                            <option value="COTTON XPRESSION">COTTON XPRESSION</option>
+                            <option value="COUNTRY BLUES">COUNTRY BLUES</option>
+                            <option value="DEEP PURPLE">DEEP PURPLE</option>
+                            <option value="ESPERANCE">ESPERANCE</option>
+                            <option value="EXPLORER">EXPLORER</option>
+                            <option value="FULL MONTY">FULL MONTY</option>
+                            <option value="FREE SPIRIT">FREE SPIRIT</option>
+                            <option value="FREEDOM">FREEDOM</option>
+                            <option value="FRUTTETO">FRUTTETO</option>
+                            <option value="GOTCHA">GOTCHA</option>
+                            <option value="HEARTS">HEARTS</option>
+                            <option value="HERMOSA">HERMOSA</option>
+                            <option value="HIGH MAGIC">HIGH MAGIC</option>
+                            <option value="HOT EXPLORER">HOT EXPLORER</option>
+                            <option value="JACARANDA">JACARANDA</option>
+                            <option value="KAHALA">KAHALA</option>
+                            <option value="LOLA">LOLA</option>
+                            <option value="LUCIANO">LUCIANO</option>
+                            <option value="MAGIC TIMES">MAGIC TIMES</option>
+                            <option value="MANDALA">MANDALA</option>
+                            <option value="MANDARIN XPRESSION">MANDARIN XPRESSION</option>
+                            <option value="MOONSTONE">MOONSTONE</option>
+                            <option value="MOMENTUM">MOMENTUM</option>
+                            <option value="MONDIAL">MONDIAL</option>
+                            <option value="NINA">NINA</option>
+                            <option value="NOVIA">NOVIA</option>
+                            <option value="ORANGE CRUSH">ORANGE CRUSH</option>
+                            <option value="PALOMA">PALOMA</option>
+                            <option value="PINK FLOYD">PINK FLOYD</option>
+                            <option value="PINK X-PRESSION">PINK X-PRESSION</option>
+                            <option value="PLAYA BLANCA">PLAYA BLANCA</option>
+                            <option value="PANDORA">PANDORA</option>
+                            <option value="PINK MONDIAL">PINK MONDIAL</option>
+                            <option value="PINK PUMA">PINK PUMA</option>
+                            <option value="POMAROSA">POMAROSA</option>
+                            <option value="POWDER PUFF">POWDER PUFF</option>
+                            <option value="PRINCESS CROWN">PRINCESS CROWN</option>
+                            <option value="PROUD">PROUD</option>
+                            <option value="QUICKSAND">QUICKSAND</option>
+                            <option value="RED PANTHER">RED PANTHER</option>
+                            <option value="SHIMMER">SHIMMER</option>
+                            <option value="SHOCKING BLUE">SHOCKING BLUE</option>
+                            <option value="SILANTOI">SILANTOI</option>
+                            <option value="SWEET BEAT">SWEET BEAT</option>
+                            <option value="SWEET UNIQUE">SWEET UNIQUE</option>
+                            <option value="TIBET">TIBET</option>
+                            <option value="TIFFANY">TIFFANY</option>
+                            <option value="VENDELA">VENDELA</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label><i class="fas fa-box"></i> Empaque</label>
+                        <select class="form-control" id="empaque">
+                            <option value="STA CLA" selected>ZC Roses</option>
+                            <option value="BUNCH">BUNCH</option>
+                            <option value="SLEEVE">SLEEVE</option>
+                            <option value="BOX">BOX</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label><i class="fas fa-cut"></i> Pto Corte</label>
+                        <select class="form-control" id="ptoCorte">
+                            <option value="RS" selected>RS</option>
+                            <option value="RC">AM</option>
+                            <option value="RB">EU</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label><i class="fas fa-ruler"></i> Longitud</label>
+                        <select class="form-control" id="longitud">
+                            <option value="40">40</option><option value="50">50</option><option value="60">60</option>
+                            <option value="70">70</option><option value="80">80</option><option value="90">90</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label><i class="fas fa-leaf"></i> Tallos</label>
+                        <select class="form-control" id="tallos">
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                            <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                            <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+                            <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+                            <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+                            <option value="22">22</option><option value="23">23</option><option value="24">24</option>
+                            <option value="25" selected>25</option><option value="26">26</option><option value="27">27</option>
+                            <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+                        </select>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-lg-4">
-                <div class="teclado-card">
-                    <div class="calculator-display" id="calcDisplay">0</div>
-                    <div class="keypad-grid">
-                        <button class="key-btn" data-num="7" data-bs-toggle="tooltip" title="7">7</button>
-                        <button class="key-btn" data-num="8" data-bs-toggle="tooltip" title="8">8</button>
-                        <button class="key-btn" data-num="9" data-bs-toggle="tooltip" title="9">9</button>
-                        <button class="key-btn" data-num="4" data-bs-toggle="tooltip" title="4">4</button>
-                        <button class="key-btn" data-num="5" data-bs-toggle="tooltip" title="5">5</button>
-                        <button class="key-btn" data-num="6" data-bs-toggle="tooltip" title="6">6</button>
-                        <button class="key-btn" data-num="1" data-bs-toggle="tooltip" title="1">1</button>
-                        <button class="key-btn" data-num="2" data-bs-toggle="tooltip" title="2">2</button>
-                        <button class="key-btn" data-num="3" data-bs-toggle="tooltip" title="3">3</button>
-                        <button class="key-btn" data-num="0" data-bs-toggle="tooltip" title="0">0</button>
-                        <button class="key-btn ir" id="irButton" data-bs-toggle="tooltip" title="Registrar e imprimir"><i class="fas fa-print"></i> IR</button>
-                        <button class="key-btn backspace" id="backspaceButton" data-bs-toggle="tooltip" title="Borrar"><i class="fas fa-delete-left"></i></button>
-                    </div>
-                    <div class="quick-presets">
-                        <button class="preset-btn" data-preset="10" data-bs-toggle="tooltip" title="10 etiquetas">10</button>
-                        <button class="preset-btn" data-preset="15" data-bs-toggle="tooltip" title="15 etiquetas">15</button>
-                        <button class="preset-btn" data-preset="20" data-bs-toggle="tooltip" title="20 etiquetas">20</button>
-                        <button class="preset-btn" data-preset="25" data-bs-toggle="tooltip" title="25 etiquetas">25</button>
-                        <button class="preset-btn" data-preset="30" data-bs-toggle="tooltip" title="30 etiquetas">30</button>
-                        <button class="preset-btn" data-preset="50" data-bs-toggle="tooltip" title="50 etiquetas">50</button>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn-primary" id="btnRegistrar" data-bs-toggle="tooltip" title="Guardar en base de datos"><i class="fas fa-save"></i> Registrar</button>
-                        <button class="btn-secondary" id="btnImprimir" data-bs-toggle="tooltip" title="Imprimir sin guardar"><i class="fas fa-print"></i> Imprimir</button>
-                    </div>
+
+            <!-- Teclado profesional -->
+            <div class="teclado-card">
+                <div class="calculator-display" id="calcDisplay">0</div>
+                <div class="keypad-grid">
+                    <button class="key-btn" data-num="7">7</button>
+                    <button class="key-btn" data-num="8">8</button>
+                    <button class="key-btn" data-num="9">9</button>
+                    <button class="key-btn" data-num="4">4</button>
+                    <button class="key-btn" data-num="5">5</button>
+                    <button class="key-btn" data-num="6">6</button>
+                    <button class="key-btn" data-num="1">1</button>
+                    <button class="key-btn" data-num="2">2</button>
+                    <button class="key-btn" data-num="3">3</button>
+                    <button class="key-btn" data-num="0">0</button>
+                    <button class="key-btn ir" id="irButton">IR</button>
+                    <button class="key-btn backspace" id="backspaceButton"><i class="fas fa-delete-left"></i></button>
+                </div>
+                <div class="quick-presets">
+                    <button class="preset-btn" data-preset="10">10</button>
+                    <button class="preset-btn" data-preset="15">15</button>
+                    <button class="preset-btn" data-preset="20">20</button>
+                    <button class="preset-btn" data-preset="25">25</button>
+                    <button class="preset-btn" data-preset="30">30</button>
+                    <button class="preset-btn" data-preset="50">50</button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-primary" id="btnRegistrar"><i class="fas fa-save"></i> Registrar</button>
+                    <button class="btn-secondary" id="btnImprimir"><i class="fas fa-print"></i> Imprimir</button>
                 </div>
             </div>
         </div>
@@ -707,26 +809,24 @@
                 <i class="fas fa-history" style="color:#1e3a5f;"></i> Últimos registros (máx 20)
             </div>
             <div class="historial-tabla">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="historialTable">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Variedad</th>
-                                <th>Long</th>
-                                <th>Tallos</th>
-                                <th>Empaque</th>
-                                <th>Calidad</th>
-                                <th>Corte</th>
-                                <th>Código</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="historialBody">
-                            <tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <table id="historialTable">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Variedad</th>
+                            <th>Long</th>
+                            <th>Tallos</th>
+                            <th>Empaque</th>
+                            <th>Calidad</th>
+                            <th>Corte</th>
+                            <th>Código</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="historialBody">
+                        <tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -757,7 +857,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn-clear" id="btnClearInventoryMatriz" data-bs-toggle="tooltip" title="Limpiar solo vista local"><i class="fas fa-trash-alt"></i> Limpiar inventario</button>
+            <button class="btn-clear" id="btnClearInventoryMatriz"><i class="fas fa-trash-alt"></i> Limpiar inventario</button>
         </div>
 
         <div class="filters">
@@ -778,60 +878,27 @@
         </div>
 
         <div class="table-container">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover" id="matrizTable">
-                    <thead id="matrizThead"></thead>
-                    <tbody id="matrizTbody">
-                        <tr class="empty-row"><td colspan="100">Cargando...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <table id="matrizTable">
+                <thead id="matrizThead"></thead>
+                <tbody id="matrizTbody">
+                    <tr class="empty-row"><td colspan="100">Cargando...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <!-- Footer -->
     <div class="footer-info">
-        <div class="badge-custom"><i class="fas fa-tag" style="color:#1e3a5f;"></i> Lote: <span id="loteDisplay">RS-40-BE</span></div>
-        <div class="badge-custom"><i class="fas fa-temperature-low"></i> Cámara: 3.2°C</div>
-        <div class="badge-custom"><i class="fas fa-clock"></i> Último registro: <span id="ultimoRegistro">--:--</span></div>
+        <div class="badge"><i class="fas fa-tag" style="color:#1e3a5f;"></i> Lote: <span id="loteDisplay">RS-40-BE</span></div>
+        <div class="badge"><i class="fas fa-temperature-low"></i> Cámara: 3.2°C</div>
+        <div class="badge"><i class="fas fa-clock"></i> Último registro: <span id="ultimoRegistro">--:--</span></div>
         <div><i class="fas fa-check-circle" style="color:#2b6e3b;"></i> Activo</div>
     </div>
 </div>
 
-<!-- MODAL DE CONFIRMACIÓN -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        ¿Estás seguro de que deseas eliminar este registro?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST NOTIFICATIONS -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
-  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header">
-      <strong class="me-auto">Inventario</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body" id="toastBody">
-      Mensaje
-    </div>
-  </div>
-</div>
-
 <script>
     (function() {
+        
         // --- CONFIGURACIÓN DE LA API ---
         const API_URL = 'https://inventario-rosas-backend-production.up.railway.app/api/ramos';
 
@@ -901,22 +968,6 @@
         // Historial (últimos 20 registros)
         let historial = [];
 
-        // Para el modal de eliminación
-        let pendingDeleteId = null;
-
-        // Toast instance
-        const toastEl = document.getElementById('liveToast');
-        const toastBody = document.getElementById('toastBody');
-        const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
-
-        // Mostrar notificación toast
-        function showToast(message, isError = false) {
-            toastBody.textContent = message;
-            toastEl.classList.toggle('bg-danger', isError);
-            toastEl.classList.toggle('bg-success', !isError);
-            toast.show();
-        }
-
         const calidadAbrMap = {
             'Exportacion': 'E',
             'Clase b': 'B',
@@ -983,11 +1034,9 @@
                     if (tabMatriz.classList.contains('active')) renderizarMatriz();
                 } else {
                     console.error('Error al cargar datos:', result.error);
-                    showToast('Error al cargar datos: ' + result.error, true);
                 }
             } catch (error) {
                 console.error('Error de conexión:', error);
-                showToast('Error de conexión con el servidor', true);
             }
         }
 
@@ -1024,46 +1073,34 @@
                     await cargarRamosDesdeAPI();
                     const ahora = new Date();
                     ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
-                    showToast(`${cantidad} etiqueta(s) registrada(s) correctamente.`);
                     if (imprimir) {
                         generarPDFeImprimir(nuevosRegistros, tipo);
                     }
                 } else {
-                    showToast('Error al guardar: ' + result.error, true);
+                    alert('Error al guardar en la base de datos: ' + result.error);
                 }
             } catch (error) {
                 console.error('Error en agregarRegistros:', error);
-                showToast('Error de conexión con el servidor', true);
+                alert('Error de conexión con el servidor');
             }
         }
 
         async function eliminarRegistro(codigo, id) {
-            pendingDeleteId = { codigo, id };
-            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-            modal.show();
-        }
-
-        // Función real de eliminación llamada desde el modal
-        async function performDelete() {
-            if (!pendingDeleteId) return;
-            try {
-                const response = await fetch(`${API_URL}/${pendingDeleteId.id}`, {
-                    method: 'DELETE'
-                });
-                const result = await response.json();
-                if (result.success) {
-                    await cargarRamosDesdeAPI();
-                    showToast('Registro eliminado correctamente.');
-                } else {
-                    showToast('Error al eliminar: ' + result.error, true);
+            if (confirm('¿Eliminar este registro?')) {
+                try {
+                    const response = await fetch(`${API_URL}/${id}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        await cargarRamosDesdeAPI();
+                    } else {
+                        alert('Error al eliminar: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error en eliminarRegistro:', error);
+                    alert('Error de conexión con el servidor');
                 }
-            } catch (error) {
-                console.error('Error en eliminarRegistro:', error);
-                showToast('Error de conexión con el servidor', true);
-            } finally {
-                pendingDeleteId = null;
-                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-                if (modalInstance) modalInstance.hide();
             }
         }
 
@@ -1198,8 +1235,8 @@
                     this.contentWindow.print();
                 } catch (error) {
                     console.error('Error al imprimir:', error);
-                    showToast('Error al imprimir', true);
                 } finally {
+                    // Limpiar el iframe y revocar la URL después de un tiempo
                     setTimeout(() => {
                         document.body.removeChild(iframe);
                         URL.revokeObjectURL(pdfUrl);
@@ -1230,7 +1267,7 @@
                             <td>${item.ptoCorte}</td>
                             <td>${item.codigo}</td>
                             <td><i class="fas fa-trash-alt delete-btn" onclick="eliminarRegistro('${item.codigo}', ${item.id})"></i></td>
-                         </tr>`;
+                        </tr>`;
             });
             historialBody.innerHTML = html;
         }
@@ -1317,15 +1354,16 @@
 
         function registrarEtiquetas() {
             let cant = parseInt(currentValue, 10);
-            if (!cant) { showToast('La cantidad no puede ser 0', true); return; }
+            if (!cant) { alert('La cantidad no puede ser 0'); return; }
             agregarRegistros(cant, false, '');
             resetearContador();
+            alert(`${cant} etiqueta(s) registrada(s).`);
         }
 
         function imprimirEtiquetas() {
             let cant = parseInt(currentValue, 10);
             if (!cant) {
-                showToast('La cantidad no puede ser 0', true);
+                alert('La cantidad no puede ser 0');
                 return;
             }
             const datosBase = obtenerDatosFormulario();
@@ -1349,7 +1387,6 @@
             }
             generarPDFeImprimir(registrosParaImprimir, 'IMP');
             resetearContador();
-            showToast(`${cant} etiqueta(s) enviadas a impresión.`);
         }
 
         btnRegistrar.addEventListener('click', e => { e.preventDefault(); registrarEtiquetas(); });
@@ -1357,14 +1394,15 @@
         irButton.addEventListener('click', e => {
             e.preventDefault();
             let cant = parseInt(currentValue, 10);
-            if (!cant) { showToast('La cantidad no puede ser 0', true); return; }
+            if (!cant) { alert('La cantidad no puede ser 0'); return; }
             agregarRegistros(cant, true, 'IR');
             resetearContador();
+            alert(`${cant} etiqueta(s) registrada(s) e impresa(s).`);
         });
 
         btnClearInventoryMatriz.addEventListener('click', e => {
             e.preventDefault();
-            if (confirm('¿Limpiar solo la vista local? Los datos en la base de datos permanecen.')) {
+            if (confirm('¿Limpiar todo el inventario?')) {
                 inventario = [];
                 codigoCounter = 1;
                 historial = [];
@@ -1372,7 +1410,7 @@
                 renderizarMatriz();
                 actualizarHistorial();
                 ultimoRegistroSpan.innerText = '--:--';
-                showToast('Vista local limpiada (solo visual)');
+                alert('Solo se limpió la vista local. Los datos en la base de datos permanecen.');
             }
         });
 
@@ -1404,15 +1442,6 @@
         variedadSelect.addEventListener('change', actualizarLote);
         actualizarLote();
 
-        // Inicializar tooltips de Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        // Evento para el botón de confirmación de eliminación
-        document.getElementById('confirmDeleteBtn').addEventListener('click', performDelete);
-
         // Inicializar
         cargarRamosDesdeAPI();
         updateDisplay();
@@ -1421,7 +1450,5 @@
         window.eliminarRegistro = eliminarRegistro;
     })();
 </script>
-<!-- Bootstrap JS Bundle (ya incluido en el CDN al final, pero lo pongo de nuevo por si acaso) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
