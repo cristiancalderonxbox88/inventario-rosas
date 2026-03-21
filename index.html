@@ -1158,16 +1158,15 @@
             };
         }
 
-        // --- NUEVA FUNCIÓN: GENERAR HTML E IMPRIMIR (ADAPTABLE A CUALQUIER PAPEL) ---
+        // --- FUNCIÓN PARA GENERAR HTML CON EL DISEÑO ORIGINAL DEL PDF (ADAPTABLE A CUALQUIER PAPEL) ---
         function generarHTMLyImprimir(registros, tipo) {
-            // Crear un documento HTML temporal con una etiqueta por página
             const ventana = window.open('', '_blank');
             if (!ventana) {
                 alert('Por favor, permite las ventanas emergentes para imprimir las etiquetas.');
                 return;
             }
 
-            // Estilos CSS para la etiqueta (tamaño real: 58mm x 25mm, horizontal)
+            // Estilos que replican exactamente el diseño del PDF original
             const estilos = `
                 <style>
                     @page {
@@ -1178,31 +1177,47 @@
                         margin: 0;
                         padding: 0;
                         background: white;
-                        font-family: 'Arial', 'Helvetica', sans-serif;
+                        font-family: Arial, Helvetica, sans-serif;
                     }
                     .etiqueta {
                         width: 58mm;
                         height: 25mm;
                         box-sizing: border-box;
-                        page-break-after: always; /* cada etiqueta en página aparte */
+                        page-break-after: always;
                         position: relative;
-                        padding: 2mm 1mm;
-                        border: 0px solid #ccc;
+                        padding: 0;
+                        margin: 0;
                         overflow: hidden;
                     }
-                    .contenido {
-                        width: 100%;
-                        height: 100%;
-                        position: relative;
+                    /* Posiciones exactas según el PDF */
+                    .texto-producto {
+                        position: absolute;
+                        top: 1mm;
+                        left: 2mm;
+                        font-size: 5pt;
+                        font-weight: normal;
+                        color: black;
+                    }
+                    .tipo-etiqueta {
+                        position: absolute;
+                        top: 1mm;
+                        right: 2mm;
+                        font-size: 5pt;
+                        font-weight: bold;
+                        color: black;
                     }
                     .variedad {
+                        position: absolute;
+                        top: 7mm;
+                        left: 0;
+                        right: 0;
+                        text-align: center;
                         font-size: 14pt;
                         font-weight: bold;
-                        text-align: center;
-                        margin-top: 2mm;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
+                        padding: 0 2mm;
                     }
                     .long-tallos {
                         position: absolute;
@@ -1220,46 +1235,61 @@
                     }
                     .codigo-barras {
                         position: absolute;
-                        top: 6mm;
+                        top: 12mm;
                         left: 0;
                         right: 0;
                         text-align: center;
-                        margin: 0 auto;
                     }
                     .codigo-barras canvas {
-                        width: 50mm;
+                        width: 35mm;
                         height: 8mm;
                     }
                     .codigo-texto {
                         position: absolute;
-                        bottom: 0mm;
+                        bottom: 1mm;
                         left: 0;
                         right: 0;
                         text-align: center;
-                        font-size: 6pt;
+                        font-size: 5pt;
                         font-family: monospace;
+                    }
+                    /* Texto adicional que estaba en el PDF (ZC ROSES y THE BEST...) */
+                    .zc-roses {
+                        position: absolute;
+                        bottom: 10mm;
+                        left: 2mm;
+                        font-size: 6pt;
+                        font-weight: normal;
+                    }
+                    .the-best {
+                        position: absolute;
+                        bottom: 8mm;
+                        left: 2mm;
+                        font-size: 6pt;
+                        font-weight: normal;
                     }
                 </style>
             `;
 
             ventana.document.write('<html><head><title>Etiquetas ZC ROSES</title>' + estilos + '</head><body>');
 
-            // Por cada registro, generar una etiqueta
             registros.forEach(registro => {
                 const proveedorIniciales = (registro.proveedor || 'ZC ROSES').split(' ').map(p => p.charAt(0)).join('');
                 const calidadAbr = registro.calidadAbr || 'E';
                 const tallosTexto = `${registro.longitud}/${registro.tallos}`;
+                const tipoMostrar = tipo || ''; // "IR" o "IMP" según corresponda
 
-                // Crear contenedor de etiqueta
                 ventana.document.write(`
                     <div class="etiqueta">
-                        <div class="contenido">
-                            <div class="variedad">${escapeHtml(registro.variedad)}</div>
-                            <div class="long-tallos">${tallosTexto}</div>
-                            <div class="proveedor-calidad">${proveedorIniciales} | ${calidadAbr}</div>
-                            <div class="codigo-barras" id="barcode-${registro.codigo}"></div>
-                            <div class="codigo-texto">${registro.codigo}</div>
-                        </div>
+                        <div class="texto-producto">PRODUCT GROWN IN ECUADOR</div>
+                        <div class="tipo-etiqueta">${escapeHtml(tipoMostrar)}</div>
+                        <div class="variedad">${escapeHtml(registro.variedad)}</div>
+                        <div class="long-tallos">${tallosTexto}</div>
+                        <div class="proveedor-calidad">${escapeHtml(proveedorIniciales)} | ${calidadAbr}</div>
+                        <div class="zc-roses">ZC ROSES</div>
+                        <div class="the-best">THE BEST FLOWER FOR YOU</div>
+                        <div class="codigo-barras" id="barcode-${registro.codigo}"></div>
+                        <div class="codigo-texto">${registro.codigo}</div>
                     </div>
                 `);
             });
@@ -1267,13 +1297,12 @@
             ventana.document.write('</body></html>');
             ventana.document.close();
 
-            // Esperar a que el DOM esté listo para generar los códigos de barras
             ventana.onload = () => {
                 registros.forEach(registro => {
-                    const canvasContainer = ventana.document.getElementById(`barcode-${registro.codigo}`);
-                    if (canvasContainer) {
+                    const container = ventana.document.getElementById(`barcode-${registro.codigo}`);
+                    if (container) {
                         const canvas = ventana.document.createElement('canvas');
-                        canvasContainer.appendChild(canvas);
+                        container.appendChild(canvas);
                         JsBarcode(canvas, registro.codigo, {
                             format: "CODE128",
                             width: 2,
@@ -1283,17 +1312,12 @@
                         });
                     }
                 });
-
-                // Luego de generar los códigos, abrir diálogo de impresión
                 ventana.print();
-                // Opcional: cerrar la ventana después de imprimir (el usuario puede decidir)
-                ventana.onafterprint = () => {
-                    // ventana.close(); // si quieres que se cierre automáticamente
-                };
+                // Opcional: cerrar ventana después de imprimir (se puede activar si se desea)
+                // ventana.onafterprint = () => ventana.close();
             };
         }
 
-        // Función auxiliar para escapar HTML
         function escapeHtml(text) {
             if (!text) return '';
             return text.replace(/[&<>]/g, function(m) {
