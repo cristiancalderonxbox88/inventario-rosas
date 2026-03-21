@@ -22,7 +22,7 @@
         }
 
         body {
-            background: #e8f0e8;  /* Verde muy suave de fondo */
+            background: #e8f0e8;
             font-family: 'Inter', sans-serif;
             display: flex;
             justify-content: center;
@@ -41,7 +41,6 @@
             padding: 24px 28px;
             max-height: 98vh;
             overflow-y: auto;
-            transition: background 0.3s, box-shadow 0.3s;
         }
 
         /* Header */
@@ -960,7 +959,7 @@
 
         // Calculadora
         const calcDisplay = document.getElementById('calcDisplay');
-        let currentValue = '0'; // 🔹 CAMBIADO A 0
+        let currentValue = '0';
 
         // Inventario completo (para matriz)
         let inventario = [];
@@ -986,22 +985,21 @@
             const año = ahora.getFullYear().toString().slice(-2);
             const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
             const dia = ahora.getDate().toString().padStart(2, '0');
-            const fecha = `${año}${mes}${dia}`; // 6 dígitos
+            const fecha = `${año}${mes}${dia}`;
             const secuencia = codigoCounter;
-            const secuenciaStr = secuencia.toString().padStart(8, '0'); // 8 dígitos
-            codigoCounter++; // incrementamos para el próximo
-            return fecha + secuenciaStr; // 14 dígitos total
+            const secuenciaStr = secuencia.toString().padStart(8, '0');
+            codigoCounter++;
+            return fecha + secuenciaStr;
         }
 
-        // --- FUNCIÓN PARA GENERAR CÓDIGO TEMPORAL (SOLO PARA IMPRESIÓN SIN GUARDAR) ---
         function generarCodigoTemporal() {
             const ahora = new Date();
             const año = ahora.getFullYear().toString().slice(-2);
             const mes = (ahora.getMonth() + 1).toString().padStart(2, '0');
             const dia = ahora.getDate().toString().padStart(2, '0');
-            const fecha = `${año}${mes}${dia}`; // 6 dígitos
-            const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0'); // 8 dígitos aleatorios
-            return fecha + random; // 14 dígitos
+            const fecha = `${año}${mes}${dia}`;
+            const random = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+            return fecha + random;
         }
 
         // --- FUNCIONES DE COMUNICACIÓN CON LA API ---
@@ -1011,8 +1009,6 @@
                 const result = await response.json();
                 if (result.success) {
                     inventario = result.data;
-
-                    // Calcular el contador global
                     if (inventario.length > 0) {
                         const maxSec = inventario.reduce((max, item) => {
                             const sec = parseInt(item.codigo.slice(-8)) || 0;
@@ -1022,8 +1018,6 @@
                     } else {
                         codigoCounter = 1;
                     }
-
-                    // Actualizar historial (últimos 20)
                     historial = inventario.slice(0, 20).map(r => ({
                         fecha: r.fecha,
                         variedad: r.variedad,
@@ -1035,7 +1029,6 @@
                         codigo: r.codigo,
                         id: r.id
                     }));
-
                     actualizarHistorial();
                     actualizarEstadisticasMatriz();
                     if (tabMatriz.classList.contains('active')) renderizarMatriz();
@@ -1078,10 +1071,8 @@
 
                 if (result.success) {
                     await cargarRamosDesdeAPI();
-
                     const ahora = new Date();
                     ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
-
                     if (imprimir) {
                         generarPDFeImprimir(nuevosRegistros, tipo);
                     }
@@ -1101,7 +1092,6 @@
                         method: 'DELETE'
                     });
                     const result = await response.json();
-
                     if (result.success) {
                         await cargarRamosDesdeAPI();
                     } else {
@@ -1159,7 +1149,7 @@
             };
         }
 
-        // --- FUNCIÓN ORIGINAL DE GENERACIÓN DE PDF (exactamente igual que antes) ---
+        // --- FUNCIÓN PARA GENERAR PDF E IMPRIMIR DIRECTAMENTE (SIN MOSTRAR EL PDF) ---
         function generarPDFeImprimir(registros, tipo) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
@@ -1225,18 +1215,36 @@
                 doc.text(codigoTexto, codigoX, 22);
             });
 
-            // Abrir el PDF en una nueva pestaña y lanzar la impresión
+            // Convertir PDF a Blob y usar un iframe oculto para imprimir directamente
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);
-            const ventana = window.open(pdfUrl, '_blank');
-            if (ventana) {
-                // Esperamos a que el PDF se cargue y luego llamamos a print()
-                ventana.onload = function() {
-                    ventana.print();
-                };
-            } else {
-                alert('Por favor, permite las ventanas emergentes para imprimir.');
-            }
+
+            // Crear iframe oculto
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '-9999px';
+            iframe.style.left = '-9999px';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
+
+            iframe.onload = function() {
+                try {
+                    this.contentWindow.focus();
+                    this.contentWindow.print();
+                } catch (error) {
+                    console.error('Error al imprimir:', error);
+                } finally {
+                    // Limpiar el iframe y revocar la URL después de un tiempo
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                        URL.revokeObjectURL(pdfUrl);
+                    }, 1000);
+                }
+            };
+
+            iframe.src = pdfUrl;
         }
 
         function actualizarHistorial() {
