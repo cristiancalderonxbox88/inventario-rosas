@@ -22,7 +22,6 @@
             font-family: 'Inter', sans-serif !important;
         }
 
-        /* Restablecer márgenes y paddings de Bootstrap que puedan afectar */
         .app-container {
             max-width: 1400px;
             width: 100%;
@@ -35,7 +34,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -84,7 +82,6 @@
             box-shadow: 0 4px 10px rgba(30, 70, 50, 0.3);
         }
 
-        /* Pestañas (sobrescribir estilos de Bootstrap si es necesario) */
         .tabs {
             display: flex;
             gap: 8px;
@@ -128,7 +125,6 @@
             display: block;
         }
 
-        /* Formulario y teclado (mantener estilos personalizados) */
         .form-card {
             background: #f9fdf9;
             border-radius: 28px;
@@ -172,12 +168,6 @@
             gap: 4px;
         }
 
-        .form-row label i {
-            width: 16px;
-            color: #7f9f7f;
-        }
-
-        /* Sobrescribir .form-control de Bootstrap */
         .form-control, select.form-control {
             background: white;
             border: 1px solid #c0dcc0 !important;
@@ -276,10 +266,6 @@
             box-shadow: 0 5px 0 #1e4a2e, 0 8px 14px rgba(0,40,0,0.2);
         }
 
-        .key-btn.ir:hover {
-            background: #3c9c6c;
-        }
-
         .quick-presets {
             display: flex;
             gap: 8px;
@@ -300,11 +286,6 @@
             text-align: center;
             box-shadow: 0 3px 6px rgba(0,20,0,0.05);
             transition: all 0.1s;
-        }
-
-        .preset-btn:hover {
-            background: #e0f5e0;
-            border-color: #8cb08c;
         }
 
         .action-buttons {
@@ -334,22 +315,12 @@
             box-shadow: 0 8px 16px -8px #1e4a2e;
         }
 
-        .btn-primary:hover {
-            background: #3c9c6c;
-            transform: scale(1.02);
-        }
-
         .btn-secondary {
             background: white;
             border: 1px solid #b8d8b8;
             color: #1e4a2e;
         }
 
-        .btn-secondary:hover {
-            background: #f0faf0;
-        }
-
-        /* Historial y Matriz */
         .historial-card, .inventory-header {
             background: #f9fdf9;
             border-radius: 28px;
@@ -377,6 +348,7 @@
             margin-bottom: 20px;
         }
 
+        /* Sobrescribir card de Bootstrap para que coincida con el diseño */
         .stat-card {
             background: white;
             border-radius: 20px;
@@ -386,6 +358,7 @@
             gap: 16px;
             border: 1px solid #d0e0d0;
             box-shadow: 0 4px 8px rgba(0,20,0,0.05);
+            flex: 1;
         }
 
         .stat-icon {
@@ -433,14 +406,6 @@
             padding: 4px 4px 4px 16px;
         }
 
-        .filter-group input {
-            border: none;
-            padding: 10px 6px;
-            font-size: 0.9rem;
-            width: 120px;
-            outline: none;
-        }
-
         .search-box {
             flex: 1;
             min-width: 240px;
@@ -450,14 +415,6 @@
             border: 1px solid #c0dcc0;
             border-radius: 40px;
             padding: 4px 4px 4px 18px;
-        }
-
-        .search-box input {
-            border: none;
-            padding: 12px 8px;
-            font-size: 0.9rem;
-            width: 100%;
-            outline: none;
         }
 
         .filter-select {
@@ -484,11 +441,6 @@
             white-space: nowrap;
         }
 
-        .btn-clear:hover {
-            background: #ffe6e6;
-        }
-
-        /* Tablas */
         .table-container {
             overflow-x: auto;
             border-radius: 20px;
@@ -499,44 +451,26 @@
             box-shadow: 0 6px 12px rgba(0,20,0,0.05);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 1100px;
+        /* Usar clases de Bootstrap para tablas, pero mantener bordes redondeados */
+        .table {
+            margin-bottom: 0;
         }
 
-        th {
+        .table th {
             background: #e0f0e0;
             padding: 14px 8px;
             font-weight: 600;
             color: #1e4a2e;
-            text-align: left;
             border-bottom: 2px solid #c0dcc0;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        td {
+        .table td {
             padding: 12px 8px;
             border-bottom: 1px solid #d0e0d0;
             color: #1e2f3a;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f9fcf9;
-        }
-
-        tbody tr:hover {
-            background-color: #e0f5e0;
-        }
-
-        .empty-row td {
-            padding: 40px;
-            text-align: center;
-            color: #8faa8f;
-            font-style: italic;
         }
 
         .delete-btn {
@@ -545,11 +479,6 @@
             transition: color 0.1s;
         }
 
-        .delete-btn:hover {
-            color: #a14a4a;
-        }
-
-        /* Footer */
         .footer-info {
             margin-top: 24px;
             display: flex;
@@ -561,7 +490,7 @@
             color: #5f7f6f;
         }
 
-        .badge {
+        .badge-custom {
             background: #e0f0e0;
             padding: 6px 18px;
             border-radius: 30px;
@@ -571,7 +500,6 @@
             color: #1e4a2e;
         }
 
-        /* Ajustes responsivos usando utilidades de Bootstrap y manteniendo los estilos */
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -602,9 +530,9 @@
 
     <!-- Pestañas -->
     <div class="tabs">
-        <button class="tab-btn active" id="tabRegistroBtn"><i class="fas fa-pencil-alt"></i> Registro</button>
-        <button class="tab-btn" id="tabHistorialBtn"><i class="fas fa-history"></i> Historial</button>
-        <button class="tab-btn" id="tabMatrizBtn"><i class="fas fa-table"></i> Inventario Matriz</button>
+        <button class="tab-btn active" id="tabRegistroBtn" data-bs-toggle="tooltip" title="Registrar nuevas etiquetas"><i class="fas fa-pencil-alt"></i> Registro</button>
+        <button class="tab-btn" id="tabHistorialBtn" data-bs-toggle="tooltip" title="Ver últimos registros"><i class="fas fa-history"></i> Historial</button>
+        <button class="tab-btn" id="tabMatrizBtn" data-bs-toggle="tooltip" title="Inventario por fecha"><i class="fas fa-table"></i> Inventario Matriz</button>
     </div>
 
     <!-- Contenido Registro (con sistema de grillas Bootstrap) -->
@@ -742,30 +670,30 @@
                 <div class="teclado-card">
                     <div class="calculator-display" id="calcDisplay">0</div>
                     <div class="keypad-grid">
-                        <button class="key-btn" data-num="7">7</button>
-                        <button class="key-btn" data-num="8">8</button>
-                        <button class="key-btn" data-num="9">9</button>
-                        <button class="key-btn" data-num="4">4</button>
-                        <button class="key-btn" data-num="5">5</button>
-                        <button class="key-btn" data-num="6">6</button>
-                        <button class="key-btn" data-num="1">1</button>
-                        <button class="key-btn" data-num="2">2</button>
-                        <button class="key-btn" data-num="3">3</button>
-                        <button class="key-btn" data-num="0">0</button>
-                        <button class="key-btn ir" id="irButton">IR</button>
-                        <button class="key-btn backspace" id="backspaceButton"><i class="fas fa-delete-left"></i></button>
+                        <button class="key-btn" data-num="7" data-bs-toggle="tooltip" title="7">7</button>
+                        <button class="key-btn" data-num="8" data-bs-toggle="tooltip" title="8">8</button>
+                        <button class="key-btn" data-num="9" data-bs-toggle="tooltip" title="9">9</button>
+                        <button class="key-btn" data-num="4" data-bs-toggle="tooltip" title="4">4</button>
+                        <button class="key-btn" data-num="5" data-bs-toggle="tooltip" title="5">5</button>
+                        <button class="key-btn" data-num="6" data-bs-toggle="tooltip" title="6">6</button>
+                        <button class="key-btn" data-num="1" data-bs-toggle="tooltip" title="1">1</button>
+                        <button class="key-btn" data-num="2" data-bs-toggle="tooltip" title="2">2</button>
+                        <button class="key-btn" data-num="3" data-bs-toggle="tooltip" title="3">3</button>
+                        <button class="key-btn" data-num="0" data-bs-toggle="tooltip" title="0">0</button>
+                        <button class="key-btn ir" id="irButton" data-bs-toggle="tooltip" title="Registrar e imprimir"><i class="fas fa-print"></i> IR</button>
+                        <button class="key-btn backspace" id="backspaceButton" data-bs-toggle="tooltip" title="Borrar"><i class="fas fa-delete-left"></i></button>
                     </div>
                     <div class="quick-presets">
-                        <button class="preset-btn" data-preset="10">10</button>
-                        <button class="preset-btn" data-preset="15">15</button>
-                        <button class="preset-btn" data-preset="20">20</button>
-                        <button class="preset-btn" data-preset="25">25</button>
-                        <button class="preset-btn" data-preset="30">30</button>
-                        <button class="preset-btn" data-preset="50">50</button>
+                        <button class="preset-btn" data-preset="10" data-bs-toggle="tooltip" title="10 etiquetas">10</button>
+                        <button class="preset-btn" data-preset="15" data-bs-toggle="tooltip" title="15 etiquetas">15</button>
+                        <button class="preset-btn" data-preset="20" data-bs-toggle="tooltip" title="20 etiquetas">20</button>
+                        <button class="preset-btn" data-preset="25" data-bs-toggle="tooltip" title="25 etiquetas">25</button>
+                        <button class="preset-btn" data-preset="30" data-bs-toggle="tooltip" title="30 etiquetas">30</button>
+                        <button class="preset-btn" data-preset="50" data-bs-toggle="tooltip" title="50 etiquetas">50</button>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn-primary" id="btnRegistrar"><i class="fas fa-save"></i> Registrar</button>
-                        <button class="btn-secondary" id="btnImprimir"><i class="fas fa-print"></i> Imprimir</button>
+                        <button class="btn-primary" id="btnRegistrar" data-bs-toggle="tooltip" title="Guardar en base de datos"><i class="fas fa-save"></i> Registrar</button>
+                        <button class="btn-secondary" id="btnImprimir" data-bs-toggle="tooltip" title="Imprimir sin guardar"><i class="fas fa-print"></i> Imprimir</button>
                     </div>
                 </div>
             </div>
@@ -779,24 +707,26 @@
                 <i class="fas fa-history" style="color:#1e3a5f;"></i> Últimos registros (máx 20)
             </div>
             <div class="historial-tabla">
-                <table id="historialTable">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Variedad</th>
-                            <th>Long</th>
-                            <th>Tallos</th>
-                            <th>Empaque</th>
-                            <th>Calidad</th>
-                            <th>Corte</th>
-                            <th>Código</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="historialBody">
-                        <tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="historialTable">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Variedad</th>
+                                <th>Long</th>
+                                <th>Tallos</th>
+                                <th>Empaque</th>
+                                <th>Calidad</th>
+                                <th>Corte</th>
+                                <th>Código</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialBody">
+                            <tr class="empty-row"><td colspan="9">No hay registros aún.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -827,7 +757,7 @@
                     </div>
                 </div>
             </div>
-            <button class="btn-clear" id="btnClearInventoryMatriz"><i class="fas fa-trash-alt"></i> Limpiar inventario</button>
+            <button class="btn-clear" id="btnClearInventoryMatriz" data-bs-toggle="tooltip" title="Limpiar solo vista local"><i class="fas fa-trash-alt"></i> Limpiar inventario</button>
         </div>
 
         <div class="filters">
@@ -848,27 +778,60 @@
         </div>
 
         <div class="table-container">
-            <table id="matrizTable">
-                <thead id="matrizThead"></thead>
-                <tbody id="matrizTbody">
-                    <tr class="empty-row"><td colspan="100">Cargando...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="matrizTable">
+                    <thead id="matrizThead"></thead>
+                    <tbody id="matrizTbody">
+                        <tr class="empty-row"><td colspan="100">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <!-- Footer -->
     <div class="footer-info">
-        <div class="badge"><i class="fas fa-tag" style="color:#1e3a5f;"></i> Lote: <span id="loteDisplay">RS-40-BE</span></div>
-        <div class="badge"><i class="fas fa-temperature-low"></i> Cámara: 3.2°C</div>
-        <div class="badge"><i class="fas fa-clock"></i> Último registro: <span id="ultimoRegistro">--:--</span></div>
+        <div class="badge-custom"><i class="fas fa-tag" style="color:#1e3a5f;"></i> Lote: <span id="loteDisplay">RS-40-BE</span></div>
+        <div class="badge-custom"><i class="fas fa-temperature-low"></i> Cámara: 3.2°C</div>
+        <div class="badge-custom"><i class="fas fa-clock"></i> Último registro: <span id="ultimoRegistro">--:--</span></div>
         <div><i class="fas fa-check-circle" style="color:#2b6e3b;"></i> Activo</div>
     </div>
 </div>
 
+<!-- MODAL DE CONFIRMACIÓN -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este registro?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATIONS -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Inventario</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toastBody">
+      Mensaje
+    </div>
+  </div>
+</div>
+
 <script>
     (function() {
-        
         // --- CONFIGURACIÓN DE LA API ---
         const API_URL = 'https://inventario-rosas-backend-production.up.railway.app/api/ramos';
 
@@ -938,6 +901,22 @@
         // Historial (últimos 20 registros)
         let historial = [];
 
+        // Para el modal de eliminación
+        let pendingDeleteId = null;
+
+        // Toast instance
+        const toastEl = document.getElementById('liveToast');
+        const toastBody = document.getElementById('toastBody');
+        const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+
+        // Mostrar notificación toast
+        function showToast(message, isError = false) {
+            toastBody.textContent = message;
+            toastEl.classList.toggle('bg-danger', isError);
+            toastEl.classList.toggle('bg-success', !isError);
+            toast.show();
+        }
+
         const calidadAbrMap = {
             'Exportacion': 'E',
             'Clase b': 'B',
@@ -1004,9 +983,11 @@
                     if (tabMatriz.classList.contains('active')) renderizarMatriz();
                 } else {
                     console.error('Error al cargar datos:', result.error);
+                    showToast('Error al cargar datos: ' + result.error, true);
                 }
             } catch (error) {
                 console.error('Error de conexión:', error);
+                showToast('Error de conexión con el servidor', true);
             }
         }
 
@@ -1043,34 +1024,46 @@
                     await cargarRamosDesdeAPI();
                     const ahora = new Date();
                     ultimoRegistroSpan.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+                    showToast(`${cantidad} etiqueta(s) registrada(s) correctamente.`);
                     if (imprimir) {
                         generarPDFeImprimir(nuevosRegistros, tipo);
                     }
                 } else {
-                    alert('Error al guardar en la base de datos: ' + result.error);
+                    showToast('Error al guardar: ' + result.error, true);
                 }
             } catch (error) {
                 console.error('Error en agregarRegistros:', error);
-                alert('Error de conexión con el servidor');
+                showToast('Error de conexión con el servidor', true);
             }
         }
 
         async function eliminarRegistro(codigo, id) {
-            if (confirm('¿Eliminar este registro?')) {
-                try {
-                    const response = await fetch(`${API_URL}/${id}`, {
-                        method: 'DELETE'
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        await cargarRamosDesdeAPI();
-                    } else {
-                        alert('Error al eliminar: ' + result.error);
-                    }
-                } catch (error) {
-                    console.error('Error en eliminarRegistro:', error);
-                    alert('Error de conexión con el servidor');
+            pendingDeleteId = { codigo, id };
+            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            modal.show();
+        }
+
+        // Función real de eliminación llamada desde el modal
+        async function performDelete() {
+            if (!pendingDeleteId) return;
+            try {
+                const response = await fetch(`${API_URL}/${pendingDeleteId.id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    await cargarRamosDesdeAPI();
+                    showToast('Registro eliminado correctamente.');
+                } else {
+                    showToast('Error al eliminar: ' + result.error, true);
                 }
+            } catch (error) {
+                console.error('Error en eliminarRegistro:', error);
+                showToast('Error de conexión con el servidor', true);
+            } finally {
+                pendingDeleteId = null;
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+                if (modalInstance) modalInstance.hide();
             }
         }
 
@@ -1205,6 +1198,7 @@
                     this.contentWindow.print();
                 } catch (error) {
                     console.error('Error al imprimir:', error);
+                    showToast('Error al imprimir', true);
                 } finally {
                     setTimeout(() => {
                         document.body.removeChild(iframe);
@@ -1236,7 +1230,7 @@
                             <td>${item.ptoCorte}</td>
                             <td>${item.codigo}</td>
                             <td><i class="fas fa-trash-alt delete-btn" onclick="eliminarRegistro('${item.codigo}', ${item.id})"></i></td>
-                        </tr>`;
+                         </tr>`;
             });
             historialBody.innerHTML = html;
         }
@@ -1323,16 +1317,15 @@
 
         function registrarEtiquetas() {
             let cant = parseInt(currentValue, 10);
-            if (!cant) { alert('La cantidad no puede ser 0'); return; }
+            if (!cant) { showToast('La cantidad no puede ser 0', true); return; }
             agregarRegistros(cant, false, '');
             resetearContador();
-            alert(`${cant} etiqueta(s) registrada(s).`);
         }
 
         function imprimirEtiquetas() {
             let cant = parseInt(currentValue, 10);
             if (!cant) {
-                alert('La cantidad no puede ser 0');
+                showToast('La cantidad no puede ser 0', true);
                 return;
             }
             const datosBase = obtenerDatosFormulario();
@@ -1356,6 +1349,7 @@
             }
             generarPDFeImprimir(registrosParaImprimir, 'IMP');
             resetearContador();
+            showToast(`${cant} etiqueta(s) enviadas a impresión.`);
         }
 
         btnRegistrar.addEventListener('click', e => { e.preventDefault(); registrarEtiquetas(); });
@@ -1363,15 +1357,14 @@
         irButton.addEventListener('click', e => {
             e.preventDefault();
             let cant = parseInt(currentValue, 10);
-            if (!cant) { alert('La cantidad no puede ser 0'); return; }
+            if (!cant) { showToast('La cantidad no puede ser 0', true); return; }
             agregarRegistros(cant, true, 'IR');
             resetearContador();
-            alert(`${cant} etiqueta(s) registrada(s) e impresa(s).`);
         });
 
         btnClearInventoryMatriz.addEventListener('click', e => {
             e.preventDefault();
-            if (confirm('¿Limpiar todo el inventario?')) {
+            if (confirm('¿Limpiar solo la vista local? Los datos en la base de datos permanecen.')) {
                 inventario = [];
                 codigoCounter = 1;
                 historial = [];
@@ -1379,7 +1372,7 @@
                 renderizarMatriz();
                 actualizarHistorial();
                 ultimoRegistroSpan.innerText = '--:--';
-                alert('Solo se limpió la vista local. Los datos en la base de datos permanecen.');
+                showToast('Vista local limpiada (solo visual)');
             }
         });
 
@@ -1411,6 +1404,15 @@
         variedadSelect.addEventListener('change', actualizarLote);
         actualizarLote();
 
+        // Inicializar tooltips de Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Evento para el botón de confirmación de eliminación
+        document.getElementById('confirmDeleteBtn').addEventListener('click', performDelete);
+
         // Inicializar
         cargarRamosDesdeAPI();
         updateDisplay();
@@ -1419,7 +1421,7 @@
         window.eliminarRegistro = eliminarRegistro;
     })();
 </script>
-<!-- Bootstrap JS Bundle (opcional, para componentes interactivos si se usan) -->
+<!-- Bootstrap JS Bundle (ya incluido en el CDN al final, pero lo pongo de nuevo por si acaso) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
