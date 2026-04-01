@@ -921,28 +921,63 @@
         }
 
         function generarPDFeImprimir(registros, tipo) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [58,25] });
-            registros.forEach((registro, index) => {
-                if (index>0) doc.addPage([25,58]);
-                doc.setFontSize(5); doc.setFont('helvetica','bold'); doc.text(tipo,50,3);
-                doc.setFontSize(4); doc.setFont('helvetica','normal'); doc.text('PRODUCT GROWN IN ECUADOR',16,3); doc.text('ZC ROSES',2,22); doc.text('THE BEST FLOWER FOR YOU',2,24);
-                doc.setFont('helvetica','bold');
-                let variedad = registro.variedad, fontSizeVariedad = 14, maxAnchoVariedad = 40;
-                doc.setFontSize(fontSizeVariedad);
-                let anchoVariedad = doc.getTextWidth(variedad);
-                while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) { fontSizeVariedad--; doc.setFontSize(fontSizeVariedad); anchoVariedad = doc.getTextWidth(variedad); }
-                doc.text(variedad,29,9,{align:'center'});
-                doc.setFontSize(14); doc.text(`${registro.longitud}/${registro.tallos}`,3,16);
-                const proveedor = registro.proveedor || 'ZC ROSES', iniciales = proveedor.split(' ').map(p=>p.charAt(0)).join(''), calidadAbr = registro.calidadAbr || 'E';
-                doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.text(`${iniciales} |  ${calidadAbr}`,16,22);
-                const canvas = document.createElement('canvas');
-                JsBarcode(canvas, registro.codigo, { format:"CODE128", width:2, height:2, displayValue:false, margin:0 });
-                const imgData = canvas.toDataURL('image/png');
-                doc.addImage(imgData,'PNG',(68-35)/2,12,35,8);
-                doc.setFontSize(5); const codigoTexto = registro.codigo, anchoCodigo = doc.getTextWidth(codigoTexto);
-                doc.text(codigoTexto, (80-anchoCodigo)/2,22);
-            });
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [57, 25] });
+
+    registros.forEach((registro, idx) => {
+        if (idx > 0) doc.addPage([57, 25]);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(5);
+        doc.text('ZC ROSES', 2, 3);
+        if (tipo && tipo !== '') {
+            doc.setFont('helvetica', 'normal');
+            doc.text(tipo, 52, 3, { align: 'right' });  // Ancho 57, margen derecho aprox 5
+            doc.setFont('helvetica', 'bold');
+        }
+
+        // Variedad con ajuste de tamaño
+        let variedad = registro.variedad || '';
+        let fontSizeVar = 10;
+        let maxAncho = 52;
+        doc.setFontSize(fontSizeVar);
+        let anchoVar = doc.getTextWidth(variedad);
+        while (anchoVar > maxAncho && fontSizeVar > 6) {
+            fontSizeVar--;
+            doc.setFontSize(fontSizeVar);
+            anchoVar = doc.getTextWidth(variedad);
+        }
+        doc.text(variedad, 28.5, 8, { align: 'center' });  // Centrado
+
+        // Longitud / Tallos
+        doc.setFontSize(8);
+        doc.text(`${registro.longitud}/${registro.tallos}`, 3, 14);
+
+        // Calidad + Punto de corte
+        doc.setFontSize(5);
+        let calidadInfo = registro.calidadAbr || 'E';
+        let corteInfo = registro.ptoCorte || 'RS';
+        doc.text(`${calidadInfo} | ${corteInfo}`, 3, 18);
+
+        // Código de barras (más pequeño en altura)
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, registro.codigo, {
+            format: "CODE128",
+            width: 2.2,
+            height: 30,
+            displayValue: false,
+            margin: 0
+        });
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 4, 21, 49, 5);
+
+        // Texto del código centrado
+        doc.setFontSize(4);
+        doc.setFont('helvetica', 'normal');
+        const codigoTexto = registro.codigo;
+        const anchoCodigo = doc.getTextWidth(codigoTexto);
+        doc.text(codigoTexto, (57 - anchoCodigo) / 2, 23.5);
+    });
             const pdfBlob = doc.output('blob'), pdfUrl = URL.createObjectURL(pdfBlob);
             const iframe = document.createElement('iframe');
             iframe.style.position = 'absolute'; iframe.style.top = '-9999px'; iframe.style.left = '-9999px'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = 'none';
