@@ -922,7 +922,7 @@
 
         function generarPDFeImprimir(registros, tipo) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [25,58] });
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [58,25] });
             registros.forEach((registro, index) => {
                 if (index>0) doc.addPage([25,58]);
                 doc.setFontSize(5); doc.setFont('helvetica','bold'); doc.text(tipo,50,3);
