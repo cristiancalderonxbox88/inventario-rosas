@@ -927,56 +927,57 @@
     registros.forEach((registro, idx) => {
         if (idx > 0) doc.addPage([57, 25]);
 
+        // Texto superior sin cambios
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(5);
         doc.text('ZC ROSES', 2, 3);
         if (tipo && tipo !== '') {
             doc.setFont('helvetica', 'normal');
-            doc.text(tipo, 52, 3, { align: 'right' });  // Ancho 57, margen derecho aprox 5
+            doc.text(tipo, 52, 3, { align: 'right' });
             doc.setFont('helvetica', 'bold');
         }
 
-        // Variedad con ajuste de tamaño
+        // Variedad (mismo X, misma Y)
         let variedad = registro.variedad || '';
-        let fontSizeVar = 10;
+        let fontSizeVar = 11;
         let maxAncho = 52;
         doc.setFontSize(fontSizeVar);
         let anchoVar = doc.getTextWidth(variedad);
-        while (anchoVar > maxAncho && fontSizeVar > 6) {
+        while (anchoVar > maxAncho && fontSizeVar > 7) {
             fontSizeVar--;
             doc.setFontSize(fontSizeVar);
             anchoVar = doc.getTextWidth(variedad);
         }
-        doc.text(variedad, 28.5, 8, { align: 'center' });  // Centrado
+        doc.text(variedad, 29, 9, { align: 'center' }); // Y sigue 9
 
-        // Longitud / Tallos
-        doc.setFontSize(8);
+        // Longitud / Tallos (bajamos Y de 16 a 14)
+        doc.setFontSize(10);
         doc.text(`${registro.longitud}/${registro.tallos}`, 3, 14);
 
-        // Calidad + Punto de corte
-        doc.setFontSize(5);
+        // Calidad + Pto Corte (bajamos Y de 22 a 18)
+        doc.setFontSize(6);
         let calidadInfo = registro.calidadAbr || 'E';
         let corteInfo = registro.ptoCorte || 'RS';
         doc.text(`${calidadInfo} | ${corteInfo}`, 3, 18);
 
-        // Código de barras (más pequeño en altura)
+        // Código de barras (reducimos altura y movemos hacia arriba)
         const canvas = document.createElement('canvas');
         JsBarcode(canvas, registro.codigo, {
             format: "CODE128",
-            width: 2.2,
-            height: 30,
+            width: 2.5,
+            height: 30,      // reducimos la altura del canvas para que la imagen ocupe menos en el PDF
             displayValue: false,
             margin: 0
         });
         const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', 4, 21, 49, 5);
+        doc.addImage(imgData, 'PNG', 4, 18, 50, 5); // ahora Y=18, alto=5mm
 
-        // Texto del código centrado
+        // Texto del código (centrado debajo del código)
         doc.setFontSize(4);
         doc.setFont('helvetica', 'normal');
         const codigoTexto = registro.codigo;
         const anchoCodigo = doc.getTextWidth(codigoTexto);
-        doc.text(codigoTexto, (57 - anchoCodigo) / 2, 23.5);
+        doc.text(codigoTexto, (57 - anchoCodigo) / 2, 23);
     });
             const pdfBlob = doc.output('blob'), pdfUrl = URL.createObjectURL(pdfBlob);
             const iframe = document.createElement('iframe');
