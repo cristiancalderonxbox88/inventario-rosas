@@ -922,22 +922,24 @@
 
         function generarPDFeImprimir(registros, tipo) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: ' landscape ' , unit: 'mm', format: [60, 30] });
+    // Tamaño exacto de la etiqueta: ancho 57 mm, alto 25 mm
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [57, 25] });
 
     registros.forEach((registro, idx) => {
-        if (idx > 0) doc.addPage([60, 30]);
+        if (idx > 0) doc.addPage([57, 25]);
 
-        // Texto superior sin cambios
+        // === ESTILO ORIGINAL ===
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(5);
-        doc.text('ZC ROSES', 2, 3);
+        doc.text('ZC ROSES', 2, 3);                      // arriba izquierda
+
         if (tipo && tipo !== '') {
             doc.setFont('helvetica', 'normal');
-            doc.text(tipo, 52, 3, { align: 'right' });
+            doc.text(tipo, 52, 3, { align: 'right' });   // arriba derecha
             doc.setFont('helvetica', 'bold');
         }
 
-        // Variedad (mismo X, misma Y)
+        // Variedad centrada (con ajuste de tamaño si es muy larga)
         let variedad = registro.variedad || '';
         let fontSizeVar = 11;
         let maxAncho = 52;
@@ -948,37 +950,65 @@
             doc.setFontSize(fontSizeVar);
             anchoVar = doc.getTextWidth(variedad);
         }
-        doc.text(variedad, 29, 9, { align: 'center' }); // Y sigue 9
+        doc.text(variedad, 28.5, 8, { align: 'center' }); // centrado, Y = 8
 
-        // Longitud / Tallos (bajamos Y de 16 a 14)
+        // Longitud / Tallos (igual que original, pero Y ajustada)
         doc.setFontSize(10);
         doc.text(`${registro.longitud}/${registro.tallos}`, 3, 14);
 
-        // Calidad + Pto Corte (bajamos Y de 22 a 18)
+        // Calidad + Punto de corte (como original: "E | RS")
         doc.setFontSize(6);
         let calidadInfo = registro.calidadAbr || 'E';
         let corteInfo = registro.ptoCorte || 'RS';
         doc.text(`${calidadInfo} | ${corteInfo}`, 3, 18);
 
-        // Código de barras (reducimos altura y movemos hacia arriba)
+        // Código de barras (centrado, como en el diseño original)
         const canvas = document.createElement('canvas');
         JsBarcode(canvas, registro.codigo, {
             format: "CODE128",
             width: 2.5,
-            height: 30,      // reducimos la altura del canvas para que la imagen ocupe menos en el PDF
+            height: 30,
             displayValue: false,
             margin: 0
         });
         const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', 4, 18, 50, 5); // ahora Y=18, alto=5mm
+        // Ancho del código: 49mm para dejar margen izquierdo/derecho
+        doc.addImage(imgData, 'PNG', 4, 18, 49, 5);
 
-        // Texto del código (centrado debajo del código)
+        // Número del código centrado debajo (como original)
         doc.setFontSize(4);
         doc.setFont('helvetica', 'normal');
         const codigoTexto = registro.codigo;
         const anchoCodigo = doc.getTextWidth(codigoTexto);
         doc.text(codigoTexto, (57 - anchoCodigo) / 2, 23);
     });
+
+    // === Impresión (sin cambios) ===
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    iframe.onload = function() {
+        try {
+            this.contentWindow.focus();
+            this.contentWindow.print();
+        } catch(e) {
+            mostrarToast('Error al iniciar la impresión', 'error');
+        } finally {
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+                URL.revokeObjectURL(pdfUrl);
+            }, 1000);
+        }
+    };
+    iframe.src = pdfUrl;
+}
             const pdfBlob = doc.output('blob'), pdfUrl = URL.createObjectURL(pdfBlob);
             const iframe = document.createElement('iframe');
             iframe.style.position = 'absolute'; iframe.style.top = '-9999px'; iframe.style.left = '-9999px'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = 'none';
