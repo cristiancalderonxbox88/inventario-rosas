@@ -922,11 +922,15 @@
 function generarPDFeImprimir(registros, tipo) {
     const { jsPDF } = window.jspdf;
     
-    // Tamaño de etiqueta: 5.7" × 2.5" (convertido a mm)
-    // 5.7 pulgadas = 144.78 mm
-    // 2.5 pulgadas = 63.5 mm
-    const anchoMM = 144.78;
-    const altoMM = 63.5;
+    // ===== CONFIGURACIÓN FÁCIL DE CAMBIAR =====
+    // Cambia estos valores al tamaño que necesites
+    const anchoPulgadas = 5.7;   // ← Ancho en pulgadas
+    const altoPulgadas = 2.5;    // ← Alto en pulgadas
+    // ==========================================
+    
+    // Convertir a milímetros (1 pulgada = 25.4 mm)
+    const anchoMM = anchoPulgadas * 25.4;
+    const altoMM = altoPulgadas * 25.4;
     
     const doc = new jsPDF({
         orientation: 'landscape',
@@ -937,79 +941,100 @@ function generarPDFeImprimir(registros, tipo) {
     registros.forEach((registro, index) => {
         if (index > 0) doc.addPage([anchoMM, altoMM]);
         
-        // Mismos márgenes que tenías originalmente pero ajustados al nuevo tamaño
-        const marginLeft = 2;
-        const marginTop = 2;
+        // ===== SISTEMA DE COORDENADAS RELATIVAS =====
+        // Todo se posiciona en % respecto al tamaño de la etiqueta
+        const marginX = anchoMM * 0.03;      // 3% de margen izquierdo
+        const marginY = altoMM * 0.03;       // 3% de margen superior
         const centerX = anchoMM / 2;
         
-        // PRODUCT GROWN IN ECUADOR (superior izquierdo)
-        doc.setFontSize(4);
+        // ===== 1. TEXTO SUPERIOR IZQUIERDO =====
+        let fontSize = altoMM * 0.08;        // 8% del alto
+        fontSize = Math.min(fontSize, 5);    // Máximo 5mm
+        doc.setFontSize(fontSize);
         doc.setFont('helvetica', 'normal');
-        doc.text('PRODUCT GROWN IN ECUADOR', marginLeft, marginTop + 2);
+        doc.text('PRODUCT GROWN IN ECUADOR', marginX, marginY + (altoMM * 0.02));
         
-        // Tipo (IR / IMP) superior derecho
+        // ===== 2. TIPO (IR/IMP) SUPERIOR DERECHO =====
         doc.setFont('helvetica', 'bold');
-        doc.text(tipo, anchoMM - marginLeft - 3, marginTop + 2, { align: 'right' });
+        doc.text(tipo, anchoMM - marginX - 3, marginY + (altoMM * 0.02), { align: 'right' });
         
-        // VARIEDAD (centrada, igual que antes)
+        // ===== 3. VARIEDAD (CENTRADA) =====
         let variedad = registro.variedad;
-        let fontSizeVariedad = 10;
-        let maxAnchoVariedad = anchoMM - 10;
+        let fontSizeVariedad = altoMM * 0.14;  // 14% del alto
+        fontSizeVariedad = Math.min(fontSizeVariedad, 12);
+        let maxAnchoVariedad = anchoMM - (marginX * 2);
         
         doc.setFontSize(fontSizeVariedad);
         doc.setFont('helvetica', 'bold');
         let anchoVariedad = doc.getTextWidth(variedad);
         
+        // Reducir tamaño si es muy larga
         while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
             fontSizeVariedad--;
             doc.setFontSize(fontSizeVariedad);
             anchoVariedad = doc.getTextWidth(variedad);
         }
-        doc.text(variedad, centerX, marginTop + 7, { align: 'center' });
+        doc.text(variedad, centerX, altoMM * 0.13, { align: 'center' });
         
-        // Longitud / Tallos (igual que antes)
-        doc.setFontSize(9);
+        // ===== 4. LONGITUD / TALLOS =====
+        fontSize = altoMM * 0.12;
+        fontSize = Math.min(fontSize, 8);
+        doc.setFontSize(fontSize);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${registro.longitud}/${registro.tallos}`, marginLeft, marginTop + 12);
+        doc.text(`${registro.longitud}/${registro.tallos}`, marginX, altoMM * 0.21);
         
-        // Proveedor iniciales + Calidad
+        // ===== 5. PROVEEDOR + CALIDAD =====
         const proveedor = registro.proveedor || 'ZC ROSES';
         const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
         const calidadAbr = registro.calidadAbr || 'E';
-        doc.setFontSize(5);
+        fontSize = altoMM * 0.07;
+        fontSize = Math.min(fontSize, 4.5);
+        doc.setFontSize(fontSize);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${iniciales} | ${calidadAbr}`, marginLeft, marginTop + 17);
+        doc.text(`${iniciales} | ${calidadAbr}`, marginX, altoMM * 0.29);
         
-        // ZC ROSES y eslogan
-        doc.setFontSize(4.5);
-        doc.text('ZC ROSES', marginLeft, marginTop + 22);
-        doc.text('THE BEST FLOWER FOR YOU', marginLeft, marginTop + 25);
+        // ===== 6. ZC ROSES Y ESLOGAN =====
+        fontSize = altoMM * 0.07;
+        fontSize = Math.min(fontSize, 4);
+        doc.setFontSize(fontSize);
+        doc.text('ZC ROSES', marginX, altoMM * 0.37);
+        doc.text('THE BEST FLOWER FOR YOU', marginX, altoMM * 0.43);
         
-        // CÓDIGO DE BARRAS (igual que antes)
+        // ===== 7. CÓDIGO DE BARRAS =====
         const canvas = document.createElement('canvas');
+        const barcodeWidth = anchoMM - (marginX * 2);
+        const barcodeHeight = altoMM * 0.12;  // 12% del alto
+        const barcodeY = altoMM * 0.5;        // 50% del alto
+        
         JsBarcode(canvas, registro.codigo, {
             format: "CODE128",
-            width: 1.5,
-            height: 6,
+            width: 1.2,
+            height: barcodeHeight,
             displayValue: false,
             margin: 0
         });
         const imgData = canvas.toDataURL('image/png');
-        const barcodeWidth = anchoMM - 12;
+        const imgWidth = barcodeWidth;
         const imgHeight = (canvas.height * barcodeWidth) / canvas.width;
-        const imgX = (anchoMM - barcodeWidth) / 2;
-        const imgY = marginTop + 28;
-        doc.addImage(imgData, 'PNG', imgX, imgY, barcodeWidth, imgHeight);
+        const imgX = (anchoMM - imgWidth) / 2;
+        const imgY = barcodeY;
+        doc.addImage(imgData, 'PNG', imgX, imgY, imgWidth, imgHeight);
         
-        // Código debajo del código de barras
-        doc.setFontSize(4);
+        // ===== 8. TEXTO DEL CÓDIGO =====
+        fontSize = altoMM * 0.06;
+        fontSize = Math.min(fontSize, 3.5);
+        doc.setFontSize(fontSize);
         doc.setFont('helvetica', 'normal');
         const codigoTexto = registro.codigo;
-        const anchoCodigo = doc.getTextWidth(codigoTexto);
-        doc.text(codigoTexto, (anchoMM - anchoCodigo) / 2, imgY + imgHeight + 2.5);
+        doc.text(codigoTexto, centerX, imgY + imgHeight + (altoMM * 0.02), { align: 'center' });
+        
+        // ===== 9. LÍNEA INFERIOR (opcional) =====
+        doc.setDrawColor(180, 200, 180);
+        doc.setLineWidth(0.2);
+        doc.line(marginX, altoMM - marginY, anchoMM - marginX, altoMM - marginY);
     });
     
-    // IMPRESIÓN (igual que antes)
+    // ===== IMPRESIÓN =====
     const pdfBlob = doc.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     const iframe = document.createElement('iframe');
