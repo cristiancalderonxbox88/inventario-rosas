@@ -922,14 +922,11 @@
 function generarPDFeImprimir(registros, tipo) {
     const { jsPDF } = window.jspdf;
     
-    // 1 pulgada = 72 puntos (pt) en PDF
-    // Tamaño: 5.7" × 2.5"
-    const anchoPt = 5.7 * 72;  // = 410.4 pt
-    const altoPt = 2.5 * 72;   // = 180 pt
-    
-    // Convertir a milímetros para jsPDF (1 pt = 0.352778 mm)
-    const anchoMM = anchoPt * 0.352778;
-    const altoMM = altoPt * 0.352778;
+    // Tamaño de etiqueta: 5.7" × 2.5" (convertido a mm)
+    // 5.7 pulgadas = 144.78 mm
+    // 2.5 pulgadas = 63.5 mm
+    const anchoMM = 144.78;
+    const altoMM = 63.5;
     
     const doc = new jsPDF({
         orientation: 'landscape',
@@ -937,35 +934,27 @@ function generarPDFeImprimir(registros, tipo) {
         format: [anchoMM, altoMM]
     });
     
-    // Escala para posicionar elementos (usando mm como base)
-    const scale = anchoMM / 144.78; // 144.78mm = 5.7"
-    
     registros.forEach((registro, index) => {
         if (index > 0) doc.addPage([anchoMM, altoMM]);
         
-        // Márgenes en mm (3mm en todos los lados)
-        const marginX = 3;
-        const marginY = 2;
+        // Mismos márgenes que tenías originalmente pero ajustados al nuevo tamaño
+        const marginLeft = 2;
+        const marginTop = 2;
         const centerX = anchoMM / 2;
         
-        // Línea superior
-        doc.setDrawColor(180, 200, 180);
-        doc.setLineWidth(0.3);
-        doc.line(marginX, marginY, anchoMM - marginX, marginY);
-        
-        // TEXTO SUPERIOR IZQUIERDO
-        doc.setFontSize(4.5);
+        // PRODUCT GROWN IN ECUADOR (superior izquierdo)
+        doc.setFontSize(4);
         doc.setFont('helvetica', 'normal');
-        doc.text('PRODUCT GROWN IN ECUADOR', marginX, marginY + 3);
+        doc.text('PRODUCT GROWN IN ECUADOR', marginLeft, marginTop + 2);
         
-        // TEXTO SUPERIOR DERECHO (IR/IMP)
+        // Tipo (IR / IMP) superior derecho
         doc.setFont('helvetica', 'bold');
-        doc.text(tipo, anchoMM - marginX - 3, marginY + 3, { align: 'right' });
+        doc.text(tipo, anchoMM - marginLeft - 3, marginTop + 2, { align: 'right' });
         
-        // VARIEDAD (centrada)
+        // VARIEDAD (centrada, igual que antes)
         let variedad = registro.variedad;
-        let fontSizeVariedad = 11;
-        let maxAnchoVariedad = anchoMM - (marginX * 2);
+        let fontSizeVariedad = 10;
+        let maxAnchoVariedad = anchoMM - 10;
         
         doc.setFontSize(fontSizeVariedad);
         doc.setFont('helvetica', 'bold');
@@ -976,58 +965,51 @@ function generarPDFeImprimir(registros, tipo) {
             doc.setFontSize(fontSizeVariedad);
             anchoVariedad = doc.getTextWidth(variedad);
         }
-        doc.text(variedad, centerX, marginY + 8, { align: 'center' });
+        doc.text(variedad, centerX, marginTop + 7, { align: 'center' });
         
-        // LONGITUD/TALLOS
+        // Longitud / Tallos (igual que antes)
         doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${registro.longitud}/${registro.tallos}`, marginX, marginY + 12);
+        doc.text(`${registro.longitud}/${registro.tallos}`, marginLeft, marginTop + 12);
         
-        // PROVEEDOR + CALIDAD
+        // Proveedor iniciales + Calidad
         const proveedor = registro.proveedor || 'ZC ROSES';
         const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
         const calidadAbr = registro.calidadAbr || 'E';
         doc.setFontSize(5);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${iniciales} | ${calidadAbr}`, marginX, marginY + 16);
+        doc.text(`${iniciales} | ${calidadAbr}`, marginLeft, marginTop + 17);
         
-        // TEXTO ZC ROSES
+        // ZC ROSES y eslogan
         doc.setFontSize(4.5);
-        doc.text('ZC ROSES', marginX, marginY + 20);
-        doc.text('THE BEST FLOWER FOR YOU', marginX, marginY + 23);
+        doc.text('ZC ROSES', marginLeft, marginTop + 22);
+        doc.text('THE BEST FLOWER FOR YOU', marginLeft, marginTop + 25);
         
-        // CÓDIGO DE BARRAS
+        // CÓDIGO DE BARRAS (igual que antes)
         const canvas = document.createElement('canvas');
-        const barcodeWidth = anchoMM - (marginX * 2);
-        const barcodeHeight = 7;
-        
         JsBarcode(canvas, registro.codigo, {
             format: "CODE128",
             width: 1.5,
-            height: barcodeHeight,
+            height: 6,
             displayValue: false,
             margin: 0
         });
         const imgData = canvas.toDataURL('image/png');
-        const imgWidth = barcodeWidth;
+        const barcodeWidth = anchoMM - 12;
         const imgHeight = (canvas.height * barcodeWidth) / canvas.width;
-        const imgX = (anchoMM - imgWidth) / 2;
-        const imgY = marginY + 26;
-        doc.addImage(imgData, 'PNG', imgX, imgY, imgWidth, imgHeight);
+        const imgX = (anchoMM - barcodeWidth) / 2;
+        const imgY = marginTop + 28;
+        doc.addImage(imgData, 'PNG', imgX, imgY, barcodeWidth, imgHeight);
         
-        // TEXTO DEL CÓDIGO
+        // Código debajo del código de barras
         doc.setFontSize(4);
         doc.setFont('helvetica', 'normal');
         const codigoTexto = registro.codigo;
-        doc.text(codigoTexto, centerX, imgY + imgHeight + 2.5, { align: 'center' });
-        
-        // LÍNEA INFERIOR
-        doc.setDrawColor(180, 200, 180);
-        doc.setLineWidth(0.3);
-        doc.line(marginX, altoMM - marginY, anchoMM - marginX, altoMM - marginY);
+        const anchoCodigo = doc.getTextWidth(codigoTexto);
+        doc.text(codigoTexto, (anchoMM - anchoCodigo) / 2, imgY + imgHeight + 2.5);
     });
     
-    // IMPRESIÓN
+    // IMPRESIÓN (igual que antes)
     const pdfBlob = doc.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     const iframe = document.createElement('iframe');
@@ -1043,7 +1025,7 @@ function generarPDFeImprimir(registros, tipo) {
         try {
             this.contentWindow.focus();
             this.contentWindow.print();
-        } catch (e) {
+        } catch(e) {
             mostrarToast('Error al iniciar la impresión', 'error');
         } finally {
             setTimeout(() => {
@@ -1054,7 +1036,6 @@ function generarPDFeImprimir(registros, tipo) {
     };
     iframe.src = pdfUrl;
 }
-
         function obtenerRegistrosFiltrados() {
             const desde = fechaDesdeMatriz.value, hasta = fechaHastaMatriz.value, calidadFiltro = filterCalidadMatriz.value, busqueda = searchInputMatriz.value.toLowerCase();
             return inventario.filter(i => {
