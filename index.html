@@ -920,102 +920,29 @@
             return { fecha: fechaInput.value, proveedor: proveedorSelect.value, calidad: calidadSelect.value, variedad: variedadSelect.value, empaque: empaqueSelect.value, ptoCorte: ptoCorteSelect.value, longitud: longitudSelect.value, tallos: tallosSelect.value };
         }
 
-       function generarPDFeImprimir(registros, tipo) {
-    const { jsPDF } = window.jspdf;
-    // Tamaño exacto de la etiqueta: 57 mm ancho × 25 mm alto
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'cm', format: [57, 25] });
-
-    registros.forEach((registro, idx) => {
-        if (idx > 0) doc.addPage([57, 25]);
-
-        // --- Texto superior izquierdo y tipo (IR/IMP) derecha ---
-        doc.setFontSize(4);
-        doc.setFont('helvetica', 'normal');
-        doc.text('PRODUCT GROWN IN ECUADOR', 2, 3);
-        doc.setFont('helvetica', 'bold');
-        if (tipo && tipo !== '') {
-            doc.text(tipo, 55, 3, { align: 'right' });
-        }
-
-        // --- ZC ROSES y lema ---
-        doc.setFontSize(5);
-        doc.setFont('helvetica', 'bold');
-        doc.text('ZC ROSES', 2, 7);
-        doc.setFont('helvetica', 'normal');
-        doc.text('THE BEST FLOWER FOR YOU', 2, 9.5);
-
-        // --- Variedad centrada (ajusta tamaño si es larga) ---
-        doc.setFont('helvetica', 'bold');
-        let variedad = registro.variedad || '';
-        let fontSizeVar = 9;
-        let maxAncho = 52;
-        doc.setFontSize(fontSizeVar);
-        let anchoVar = doc.getTextWidth(variedad);
-        while (anchoVar > maxAncho && fontSizeVar > 6) {
-            fontSizeVar--;
-            doc.setFontSize(fontSizeVar);
-            anchoVar = doc.getTextWidth(variedad);
-        }
-        doc.text(variedad, 28.5, 12.5, { align: 'center' });
-
-        // --- Longitud / Tallos ---
-        doc.setFontSize(10);
-        doc.text(`${registro.longitud}/${registro.tallos}`, 3, 16.5);
-
-        // --- Iniciales proveedor + calidad ---
-        const proveedor = registro.proveedor || 'ZC ROSES';
-        const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
-        const calidadAbr = registro.calidadAbr || 'E';
-        doc.setFontSize(5);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${iniciales} | ${calidadAbr}`, 3, 20);
-
-        // --- Código de barras (centrado) ---
-        const canvas = document.createElement('canvas');
-        JsBarcode(canvas, registro.codigo, {
-            format: "CODE128",
-            width: 2.2,
-            height: 25,
-            displayValue: false,
-            margin: 0
-        });
-        const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', (57 - 50) / 2, 21, 50, 4.5);
-
-        // --- Texto del código debajo ---
-        doc.setFontSize(4);
-        doc.setFont('helvetica', 'normal');
-        const codigoTexto = registro.codigo;
-        const anchoCodigo = doc.getTextWidth(codigoTexto);
-        doc.text(codigoTexto, (57 - anchoCodigo) / 2, 24);
-    });
-
-    // --- Impresión (sin cambios) ---
-    const pdfBlob = doc.output('blob');
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-    iframe.onload = function() {
-        try {
-            this.contentWindow.focus();
-            this.contentWindow.print();
-        } catch(e) {
-            mostrarToast('Error al iniciar la impresión', 'error');
-        } finally {
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-                URL.revokeObjectURL(pdfUrl);
-            }, 1000);
-        }
-    };
-    iframe.src = pdfUrl;
-}
+        function generarPDFeImprimir(registros, tipo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'cm', format: [25,58] });
+            registros.forEach((registro, index) => {
+                if (index>0) doc.addPage([25,58]);
+                doc.setFontSize(5); doc.setFont('helvetica','bold'); doc.text(tipo,50,3);
+                doc.setFontSize(4); doc.setFont('helvetica','normal'); doc.text('PRODUCT GROWN IN ECUADOR',16,3); doc.text('ZC ROSES',2,22); doc.text('THE BEST FLOWER FOR YOU',2,24);
+                doc.setFont('helvetica','bold');
+                let variedad = registro.variedad, fontSizeVariedad = 14, maxAnchoVariedad = 40;
+                doc.setFontSize(fontSizeVariedad);
+                let anchoVariedad = doc.getTextWidth(variedad);
+                while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) { fontSizeVariedad--; doc.setFontSize(fontSizeVariedad); anchoVariedad = doc.getTextWidth(variedad); }
+                doc.text(variedad,29,9,{align:'center'});
+                doc.setFontSize(14); doc.text(`${registro.longitud}/${registro.tallos}`,3,16);
+                const proveedor = registro.proveedor || 'ZC ROSES', iniciales = proveedor.split(' ').map(p=>p.charAt(0)).join(''), calidadAbr = registro.calidadAbr || 'E';
+                doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.text(`${iniciales} |  ${calidadAbr}`,16,22);
+                const canvas = document.createElement('canvas');
+                JsBarcode(canvas, registro.codigo, { format:"CODE128", width:2, height:2, displayValue:false, margin:0 });
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData,'PNG',(68-35)/2,12,35,8);
+                doc.setFontSize(5); const codigoTexto = registro.codigo, anchoCodigo = doc.getTextWidth(codigoTexto);
+                doc.text(codigoTexto, (80-anchoCodigo)/2,22);
+            });
             const pdfBlob = doc.output('blob'), pdfUrl = URL.createObjectURL(pdfBlob);
             const iframe = document.createElement('iframe');
             iframe.style.position = 'absolute'; iframe.style.top = '-9999px'; iframe.style.left = '-9999px'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = 'none';
