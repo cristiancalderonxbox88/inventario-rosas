@@ -923,7 +923,7 @@
        function generarPDFeImprimir(registros, tipo) {
     const { jsPDF } = window.jspdf;
     // Tamaño exacto de la etiqueta: 57 mm ancho × 25 mm alto
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [57, 25] });
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'cm', format: [57, 25] });
 
     registros.forEach((registro, idx) => {
         if (idx > 0) doc.addPage([57, 25]);
