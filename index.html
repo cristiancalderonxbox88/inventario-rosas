@@ -922,33 +922,154 @@
 
     function generarPDFeImprimir(registros, tipo) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [25,58] });
+    // ===== 1. GENERACIÓN DEL PDF (IDÉNTICO A TU CÓDIGO ORIGINAL) =====
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [25, 58] });
+    
     registros.forEach((registro, index) => {
-        if (index>0) doc.addPage([25,58]);
-        doc.setFontSize(5); doc.setFont('helvetica','bold'); doc.text(tipo,50,3);
-        doc.setFontSize(4); doc.setFont('helvetica','normal'); doc.text('PRODUCT GROWN IN ECUADOR',16,3); doc.text('ZC ROSES',2,22); doc.text('THE BEST FLOWER FOR YOU',2,24);
-        doc.setFont('helvetica','bold');
-        let variedad = registro.variedad, fontSizeVariedad = 14, maxAnchoVariedad = 40;
+        if (index > 0) doc.addPage([25, 58]);
+
+        // Texto superior
+        doc.setFontSize(5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(tipo, 50, 3);
+
+        doc.setFontSize(4);
+        doc.setFont('helvetica', 'normal');
+        doc.text('PRODUCT GROWN IN ECUADOR', 16, 3);
+        doc.text('ZC ROSES', 2, 22);
+        doc.text('THE BEST FLOWER FOR YOU', 2, 24);
+
+        // Variedad (con ajuste de tamaño)
+        doc.setFont('helvetica', 'bold');
+        let variedad = registro.variedad;
+        let fontSizeVariedad = 14;
+        const maxAnchoVariedad = 40;
         doc.setFontSize(fontSizeVariedad);
         let anchoVariedad = doc.getTextWidth(variedad);
-        while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) { fontSizeVariedad--; doc.setFontSize(fontSizeVariedad); anchoVariedad = doc.getTextWidth(variedad); }
-        doc.text(variedad,29,9,{align:'center'});
-        doc.setFontSize(14); doc.text(`${registro.longitud}/${registro.tallos}`,3,16);
-        const proveedor = registro.proveedor || 'ZC ROSES', iniciales = proveedor.split(' ').map(p=>p.charAt(0)).join(''), calidadAbr = registro.calidadAbr || 'E';
-        doc.setFontSize(6); doc.setFont('helvetica','normal'); doc.text(`${iniciales} |  ${calidadAbr}`,16,22);
+        while (anchoVariedad > maxAnchoVariedad && fontSizeVariedad > 6) {
+            fontSizeVariedad--;
+            doc.setFontSize(fontSizeVariedad);
+            anchoVariedad = doc.getTextWidth(variedad);
+        }
+        doc.text(variedad, 29, 9, { align: 'center' });
+
+        // Longitud / Tallos
+        doc.setFontSize(14);
+        doc.text(`${registro.longitud}/${registro.tallos}`, 3, 16);
+
+        // Iniciales y calidad
+        const proveedor = registro.proveedor || 'ZC ROSES';
+        const iniciales = proveedor.split(' ').map(p => p.charAt(0)).join('');
+        const calidadAbr = registro.calidadAbr || 'E';
+        doc.setFontSize(6);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${iniciales} |  ${calidadAbr}`, 16, 22);
+
+        // Código de barras
         const canvas = document.createElement('canvas');
-        JsBarcode(canvas, registro.codigo, { format:"CODE128", width:2, height:2, displayValue:false, margin:0 });
+        JsBarcode(canvas, registro.codigo, {
+            format: "CODE128",
+            width: 2,
+            height: 2,
+            displayValue: false,
+            margin: 0
+        });
         const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData,'PNG',(68-35)/2,12,35,8);
-        doc.setFontSize(5); const codigoTexto = registro.codigo, anchoCodigo = doc.getTextWidth(codigoTexto);
-        doc.text(codigoTexto, (80-anchoCodigo)/2,22);
+        doc.addImage(imgData, 'PNG', (68 - 35) / 2, 12, 35, 8);
+
+        // Texto del código
+        doc.setFontSize(5);
+        const codigoTexto = registro.codigo;
+        const anchoCodigo = doc.getTextWidth(codigoTexto);
+        doc.text(codigoTexto, (80 - anchoCodigo) / 2, 22);
     });
-    const pdfBlob = doc.output('blob'), pdfUrl = URL.createObjectURL(pdfBlob);
+
+    // ===== 2. NUEVO MÉTODO DE ENTREGA (VISOR MODAL) =====
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    // Crear un overlay que cubra toda la pantalla
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.75)';
+    overlay.style.zIndex = '99999';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.flexDirection = 'column';
+
+    // Contenedor del iframe
+    const frameContainer = document.createElement('div');
+    frameContainer.style.width = '95%';
+    frameContainer.style.maxWidth = '500px'; // Para que se vea bien la etiqueta pequeña
+    frameContainer.style.height = '80%';
+    frameContainer.style.backgroundColor = 'white';
+    frameContainer.style.borderRadius = '16px';
+    frameContainer.style.overflow = 'hidden';
+    frameContainer.style.boxShadow = '0 20px 60px rgba(0,0,0,0.6)';
+    frameContainer.style.position = 'relative';
+
+    // Botón para cerrar (y liberar memoria)
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = '✕ Cerrar';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '12px';
+    closeBtn.style.right = '12px';
+    closeBtn.style.zIndex = '100000';
+    closeBtn.style.padding = '8px 18px';
+    closeBtn.style.background = '#e74c3c';
+    closeBtn.style.color = 'white';
+    closeBtn.style.border = 'none';
+    closeBtn.style.borderRadius = '40px';
+    closeBtn.style.fontWeight = 'bold';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+    closeBtn.onclick = function() {
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+            URL.revokeObjectURL(pdfUrl);
+        }
+    };
+
+    // El iframe que contiene el PDF
     const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute'; iframe.style.top = '-9999px'; iframe.style.left = '-9999px'; iframe.style.width = '0'; iframe.style.height = '0'; iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-    iframe.onload = function() { try { this.contentWindow.focus(); this.contentWindow.print(); } catch(e){ mostrarToast('Error al iniciar la impresión','error'); } finally { setTimeout(()=>{ document.body.removeChild(iframe); URL.revokeObjectURL(pdfUrl); },1000); } };
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
     iframe.src = pdfUrl;
+
+    // Añadir elementos al DOM
+    frameContainer.appendChild(closeBtn);
+    frameContainer.appendChild(iframe);
+    overlay.appendChild(frameContainer);
+    document.body.appendChild(overlay);
+
+    // ===== 3. DISPARAR LA IMPRESIÓN AUTOMÁTICAMENTE =====
+    // Cuando el iframe cargue, lanzamos la impresión (sin destruir el iframe)
+    iframe.onload = function() {
+        setTimeout(() => {
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (e) {
+                mostrarToast('Error al abrir impresión. Usa Ctrl+P manualmente.', 'error');
+            }
+        }, 600);
+    };
+
+    // Fallback por si el onload no se dispara (ej. PDF ya cacheado)
+    setTimeout(() => {
+        try {
+            if (iframe.contentWindow) {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }
+        } catch (e) {}
+    }, 2500);
 }
         function obtenerRegistrosFiltrados() {
             const desde = fechaDesdeMatriz.value, hasta = fechaHastaMatriz.value, calidadFiltro = filterCalidadMatriz.value, busqueda = searchInputMatriz.value.toLowerCase();
